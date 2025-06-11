@@ -1,0 +1,40 @@
+body {
+            font-family:  Arial, Helvetica, sans-serif;
+            margin: 20px;
+            background-color: #ffffcc;
+        }
+        h1{
+            background: rgb(167,5,5);
+            padding: 10px;
+            color: #ffffcc;
+            text-align: center;
+            border-bottom: 15px solid red ;
+            word-spacing: 5px;
+            letter-spacing: 5px;
+        }
+        h2 {
+            background: green;
+            color: white;
+            padding: 5px;
+        }
+        h3 {
+
+            color: #5c5a5a;
+        }
+        p {
+            line-height: 1.6;
+        }
+        ul, ol {
+            margin-left: 20px;
+            color: red;
+        }
+        table {
+            background: #c9c9c9;
+            border: #000000;
+        }
+        a {
+            text-decoration: none;
+        }
+        img {
+  border: 2px dashed #919191; 
+}

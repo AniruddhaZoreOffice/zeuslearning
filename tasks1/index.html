@@ -77,24 +77,20 @@
     </div>
     <div>
         <h3>Some random table</h3>
-        <p><b><i>Note: </i></b>It looks the part, but won't do a anything.</p>
-        <form action="/" >
+        <form id="myForm" onsubmit="validateForm()" >
+           <p><b><i>Note: </i></b>It looks the part, but won't do anything.</p>
            <p>Name:</p>
-           <input id="name" default= "" name="fname" placeholder="Your Name" type="text" autofocus/>
-           <p>Comments: </p>
+           <input id="name" name="fname" placeholder="Your Name" type="text" autofocus />
+           <p>Comments:</p>
            <textarea id="comments" name="comments" rows="5" cols="30" placeholder="Your comments"></textarea><br>
-           <p>Are you: </p>
-            <label>
-              <input type="radio" id="male" default = "" name="gender" value="Male"> Male
-            </label>
-        </br>
-    </br>
-            <label>
-              <input type="radio" id="female" name="gender" value="Female"> Female
-            </label>
-        </br>
-    </br>
-           <input type="submit" id="submitBtn" value="Submit Query" onclick="validateForm()"/>
+           <p>Are you:</p>
+           <label>
+               <input type="radio" id="male" name="gender" value="Male"> Male
+           </label>
+           <label>
+               <input type="radio" id="female" name="gender" value="Female" autofocus> Female
+           </label><br><br>
+           <input type="submit" id="submitBtn" value="Submit Query" />
         </form>
     </div>
 </body>

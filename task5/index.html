@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Login Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src ="script.js"></script>
+</head>
+<body>
+    <nav class="navbar" style="padding-left: 24px;">
+        <div class="navbar-content">
+         <img class="navbar-icon" src="icons\logo used in header.svg" alt="logo">
+        </div>
+    </nav>
+    <main class="main-content">
+      <div class="login-card">
+           <div class="loginCardTitle">
+              <img src="icons\back.svg" alt="back-icon">
+              <div>Log in with Quantum</div>
+           </div>
+           
+           <form>
+                <div class = "radio-button-section">
+                    <img id="radio-btn" src="icons\radio-button-off.svg" alt="radio button" onclick="toggleRadio()">
+                    <div>District</div> 
+                    <img  id="radio-btn" src="icons\radio-button-off.svg" alt="radio button" onclick="toggleRadio()" style="margin-left: 32px;">
+                    <div>School</div> 
+                  </label>
+                </div>
+                <div class="custom-select">
+                    <label class="select-label" for="state">State*</label>
+                    <select name="state" id="state">
+                      <option value="" ></option>
+                      <option value="Alabama">Alabama</option>
+                      <option value="Oklahoma">Oklahoma</option>
+                      <option value="Fiji">Fiji</option>
+                    </select>  
+                </div>
+                
+                <div class="custom-select">
+                    <label class="select-label" for="district">District*</label>
+                    <select name="district" id="district">
+                      <option value="" ></option>
+                      <option value="Alabama">Alabama</option>
+                      <option value="Oklahoma">Oklahoma</option>
+                      <option value="Fiji">Fiji</option>
+                    </select>  
+                </div>
+
+                <div class = "username">
+                    <input id="username" placeholder="Username/Email ID*"></input>
+                    <div>FORGOT USERNAME?</div>
+                </div> 
+                
+                <div class = "password">
+                    <div class="password-2">
+                          <input type="password" id="password" placeholder="Enter your password">
+                            <div class="eye-icon" onclick="togglePassword()">
+                              <img src="icons/preview.svg" alt="Toggle Password Visibility" id="eye-icon">
+                            </div>
+                    </div>
+                    <div style="text-align: end;">FORGOT PASSWORD?</div>
+                </div> 
+
+                <div class = "remember-section">
+                    <img class="eye-icon" src= "icons\checkbox-checked.svg" alt="icon"> 
+                    <div>Remember Me</div>
+                </div> 
+                <div class="submit-button">
+                  <button type="submit">LOG IN</button>
+                </div>
+           </form>
+        </div>
+    </main>
+    <footer>
+        <div class="about-section">
+           <div style="width: 42px; border-right: 1px solid #ccc;height:18px;padding-right: 2px;">About &nbsp</div>
+           <div style="padding-left:5px;">Contact Us</div>
+        </div>
+        <div>
+        <div class="end">
+            <div style="padding-right: 16px;border-right: 2px solid #ccc;">
+                 <img src="icons\logo used in footer.svg" alt="footer-logo" style="height: 20px;">
+            </div>
+           <div style="padding-left: 16px;">
+               Copyright © 2020-2021
+           </div >
+           <div style="padding-left:8px">
+            Zeus Systems Pvt. Ltd.
+           </div>
+           <div style="padding-left:11px">
+            All rights reserved.
+           </div>
+        </div>
+
+        </div>
+    </footer>
+</body>
+</html>

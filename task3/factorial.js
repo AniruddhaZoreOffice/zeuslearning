@@ -5,21 +5,22 @@ function factorial(n) {
         return [1];
     }
     for (let i = 2; i <= n; i++) {
-        let carry = 0;
+        let c = 0;
         for (let j = 0; j < arr.length; j++) {
-            let product = arr[j] * i + carry;
-            arr[j] = product % 10;
-            carry = Math.floor(product / 10);
+            let product = arr[j] * i + c;
+            arr[j] = product % 100000;
+            c = Math.floor(product / 100000);
         } 
-        while (carry > 0) {
-            arr.push(carry % 10);
-            carry = Math.floor(carry / 10);
+        while (c > 0) {
+            arr.push(c % 100000);
+            c = Math.floor(c / 100000);
         }
     }
     arr.reverse();
-    return arr
-    
+    return arr;
 }
 
 
-console.log(factorial(1000))
+ans = factorial(100)
+let str = ans[0].toString() + ans.slice(1).map((x) => x.toString().padStart(5,"0")).join("");
+console.log(str)

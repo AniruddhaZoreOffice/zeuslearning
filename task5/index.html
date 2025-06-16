@@ -22,17 +22,16 @@
            
            <form>
                 <div class = "radio-button-section">
-                    <img id="radio-btn" src="icons\radio-button-off.svg" alt="radio button" onclick="toggleRadio()">
+                    <img id="radio-btn" src="icons\radio-off.svg" alt="radio button" onclick="toggleRadio()">
                     <div>District</div> 
-                    <img  id="radio-btn" src="icons\radio-button-off.svg" alt="radio button" onclick="toggleRadio()" style="margin-left: 32px;">
-                    <div>School</div> 
+                    <img  id="radio-btn" src="icons\radio-off.svg" alt="radio button" onclick="toggleRadio()" style="margin-left: 32px;">
+                    <div>Independent School</div> 
                   </label>
                 </div>
                 <div class="custom-select">
                     <label class="select-label" for="state">State*</label>
                     <select name="state" id="state">
-                      <option value="" ></option>
-                      <option value="Alabama">Alabama</option>
+                      <option value="Alabama" selected>Alabama</option>
                       <option value="Oklahoma">Oklahoma</option>
                       <option value="Fiji">Fiji</option>
                     </select>  
@@ -41,10 +40,9 @@
                 <div class="custom-select">
                     <label class="select-label" for="district">District*</label>
                     <select name="district" id="district">
-                      <option value="" ></option>
-                      <option value="Alabama">Alabama</option>
-                      <option value="Oklahoma">Oklahoma</option>
-                      <option value="Fiji">Fiji</option>
+                      <option value="Alabama" selected>Alabama School District</option>
+                      <option value="Oklahoma">Oklahoma School District</option>
+                      <option value="Fiji">Fiji School District</option>
                     </select>  
                 </div>
 
@@ -55,7 +53,7 @@
                 
                 <div class = "password">
                     <div class="password-2">
-                          <input type="password" id="password" placeholder="Enter your password">
+                          <input type="password" id="password" placeholder="Password*">
                             <div class="eye-icon" onclick="togglePassword()">
                               <img src="icons/preview.svg" alt="Toggle Password Visibility" id="eye-icon">
                             </div>
@@ -65,7 +63,7 @@
 
                 <div class = "remember-section">
                     <img class="eye-icon" src= "icons\checkbox-checked.svg" alt="icon"> 
-                    <div>Remember Me</div>
+                    <div style="font-size: 16px ;font-weight: 600;color: #222222;margin-left: 3px;">Remember Me</div>
                 </div> 
                 <div class="submit-button">
                   <button type="submit">LOG IN</button>
@@ -75,21 +73,21 @@
     </main>
     <footer>
         <div class="about-section">
-           <div style="width: 42px; border-right: 1px solid #ccc;height:18px;padding-right: 2px;">About &nbsp</div>
-           <div style="padding-left:5px;">Contact Us</div>
+           <div style="width: 42px; border-right: 1px solid #ccc;height:18px;padding-right: 2px;font-weight: 600;">About &nbsp</div>
+           <div style="padding-left:7px; font-weight: 600;">Contact Us</div>
         </div>
         <div>
         <div class="end">
             <div style="padding-right: 16px;border-right: 2px solid #ccc;">
                  <img src="icons\logo used in footer.svg" alt="footer-logo" style="height: 20px;">
             </div>
-           <div style="padding-left: 16px;">
+           <div style="padding-left: 16px;font-weight: 600;">
                Copyright © 2020-2021
            </div >
-           <div style="padding-left:8px">
+           <div style="padding-left:8px;font-weight: 700;">
             Zeus Systems Pvt. Ltd.
            </div>
-           <div style="padding-left:11px">
+           <div style="padding-left:11px;font-weight: 600;">
             All rights reserved.
            </div>
         </div>

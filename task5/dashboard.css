@@ -1,0 +1,278 @@
+
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('Quicksand font 1/Quicksand-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 700; /* Enables weight interpolation for variable font */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('Quicksand font 1/static/Quicksand-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('Quicksand font 1/static/Quicksand-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('Quicksand font 1/static/Quicksand-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  src: url('Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+* {
+  font-weight: 600;
+}
+
+html {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  height: 100%;
+   margin: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #EEEEEE;
+}
+
+.main-content {
+  flex: 1;
+}
+.navbar {
+  background-color: rgba(0, 0, 0, 1);
+  background-image: url('header pattern image.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+
+}
+
+.navbar-icon {
+  padding-top: 5px;
+  width: 134px; 
+  height: 36px; 
+}
+
+main {
+  flex: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #EEEEEE;
+}
+
+.cards-container {
+position: relative;
+width: auto;
+font-family: 'Quicksand';
+}
+
+
+.container-header{
+background-color: #8DDC97;
+height: 64px;
+display: flex;
+justify-items: center;
+align-items: center;
+}
+
+.container-header div{
+display: flex;
+height: 100%;
+width: 50%;
+align-items: center;
+justify-content:center;
+gap: 4px;
+}
+
+.container-header div img {
+height: 32px;
+}
+
+.course-subheader{
+margin-top: 37px;
+display: flex;
+font-size: 12px;
+color: #686868;
+padding-bottom: 17px;
+margin-bottom: 16px;
+border-bottom: 1px solid #ccc;
+}
+
+.course-subheader div{
+width: 50%;
+}
+
+#courses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  position: relative;
+}
+
+.card-wrapper {
+  position: relative;
+  width: calc(50% - 12px);
+}
+
+.expired-label {
+  position: absolute;
+  padding: 3px;
+  padding-right: 7px;
+  top: 0px;
+  left: 0;
+  font-family: 'Quicksand';
+  color: #D80000;
+  background-color: #FFE4E6;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+#courses {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 24px; 
+  margin-top: 24px;
+}
+
+.card{
+  width: 476px;
+  background-color: #FFFFFF;
+  padding-top: 24px;
+  padding-left: 24px;
+  box-shadow: 0 2px 8px #0001;
+}
+
+.course-details {
+display: flex;
+}
+
+.specifications{
+margin-left: 16px;
+}
+
+.custom-select {
+  position: relative;
+  font-family: 'Quicksand';
+  margin-right: 20px;
+  color:#222222;
+}
+
+.icon {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.icon.disabled {
+  opacity: 0.4; 
+  pointer-events: none; 
+}
+
+.view-icon {
+  width: 26px;
+}
+.calender-icon {
+  width: 18px;
+  height: 20px;
+}
+.favourite-icon {
+  width: 18px;
+  height: 20px;
+}
+.dashboard-icon {
+  width: 26px;
+}
+
+#dropdown {
+  -webkit-appearance: none; 
+  -moz-appearance: none;    
+  appearance: none;         
+ border-bottom: 1px solid #ccc ;
+ border-top: 0;
+ border-left: 0;
+ border-right: 0;
+ padding-right:0px;
+ height: 45px;
+ width: 100%;
+ font-weight: 600;
+
+}
+.select-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.custom-select::after {
+  padding-right: 0px;
+  content: url(icons/arrow-down.svg);
+  position: absolute;
+  top: 50%;
+  right: 0px;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 20px;
+  pointer-events: none;
+}
+
+#dropdown:focus {
+  border-color: #ccc; 
+  outline: none;        
+}
+
+#dropdown {
+  font-family: 'Quicksand';
+  margin-left: 1px;
+  font-size: 16px; 
+  line-height: 1.5; 
+  padding-top: 10px; 
+  color: #222222;
+}
+
+footer {
+    margin-top: 30px;
+}
+.about-section{
+font-family: 'Quicksand';
+font-size: 14px;
+color:#1F7A54;
+height: 34px;
+background-color: #EEEEEE;
+width: 100%;
+display: flex;
+justify-content: center;
+}
+
+.end{
+    font-family: 'Quicksand';
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #E0E1E1;
+    height: 40px;
+    font-size: 12px;
+    color: #616161;
+}

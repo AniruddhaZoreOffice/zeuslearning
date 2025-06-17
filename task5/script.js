@@ -1,3 +1,26 @@
+const image = document.querySelector('.menu-icon-container');
+const hiddenDiv = document.querySelector('.menu-container');
+const icon = document.querySelector(".menu")
+
+image.addEventListener('mouseenter', () => {
+  hiddenDiv.style.display = 'block';
+  icon.style.filter = "brightness(0) invert(1)";
+});
+
+hiddenDiv.addEventListener('mouseenter',() => {
+  hiddenDiv.style.display = 'block';
+});
+
+const hideDiv = () => {
+  hiddenDiv.style.display = 'none';
+};
+
+image.addEventListener('mouseleave', hideDiv);
+hiddenDiv.addEventListener('mouseleave', hideDiv);
+
+
+
+
 function toggleRadio() {
   const radioBtn = document.getElementById('radio-btn');
   const currentSrc = radioBtn.getAttribute('src');
@@ -20,6 +43,38 @@ function togglePassword() {
     passwordInput.type = 'password';
     eyeIcon.src = 'icons/preview.svg'; }
 }
+
+
+  const headers = document.querySelectorAll('.selectable');
+
+  headers.forEach(header => {
+    header.addEventListener('click', () => {
+      headers.forEach(h => h.classList.remove('active'));
+      header.classList.add('active');
+    });
+  });
+
+ const tabs = document.querySelectorAll('.clickable');
+
+ tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('current'));
+      tab.classList.add('current');
+    } )
+ }
+ )
+
+function toggleMenu(element) {
+    element.classList.toggle("active");
+  }
+
+  function selectMenu(selectedItem) {
+    
+    const allItems = document.querySelectorAll(".menu-item");
+    allItems.forEach(item => item.classList.remove("selected"));
+
+    selectedItem.classList.add("selected");
+  }
 
 const courses = [
     { Expired : false,
@@ -136,9 +191,9 @@ if (course.dropdownOptions.length > 0) {
     <img src="${course.image}" alt="${course.title}" style="border-radius: 2px;">
     </div>
     <div class="specifications">
-    <div style="display:flex; align-items:center;">
+    <div style="display:flex; align-items:flex-start;">
        <div class="card-title" style="font-size:16px;width:260px;font-weight:600px;">${course.title}</div>
-       ${course.star ? '<img src = "icons/favourite.svg" style="float:right;margin-left:20px;">' : ''}
+       ${course.star ? '<img src = "icons/favourite.svg" class="star-icon" >' : ''}
     </div>
     <div style="display:flex; margin-top:10px;">
        <div class="info" style="font-size:12px;font-weight:600px;color:#666666">${course.subject}</div>
@@ -158,7 +213,7 @@ if (course.dropdownOptions.length > 0) {
 
     </div>
     </div>
-    <div style="padding-left:24px;padding-right:24px;display:flex;gap:100px;margin-top:18px;margin-bottom:9px;">${iconsHTML}</div>
+    <div style="padding-left:24px;padding-right:24px;display:flex;gap:100px;margin-top:18px;padding-bottom:9px;">${iconsHTML}</div>
     `;
 
     const wrapper = document.createElement("div");
@@ -169,3 +224,68 @@ if (course.dropdownOptions.length > 0) {
   wrapper.appendChild(card);
   course_container.appendChild(wrapper);
 });
+
+const announcements = [
+  {
+    pa: "Wilson Kumar",
+    seen : true,
+    message : "No classes will be held on 21st Nov",
+    course : "",
+    attachments : 2,
+    date : "15-Sep-2018",
+    time : "07:21 pm"
+  },
+   {
+    pa: "Samson White",
+    seen : false,
+    message : "Guest lecture on Geometry on 20th September",
+    course : "",
+    attachments : 2 ,
+    date : "15-Sep-2018",
+    time : "07:21 pm"
+  },
+   {
+    pa: "Wilson Kumar",
+    seen : true,
+    message : "Additional course materials available on request",
+    course : "Mathematics 101",
+    attachments : 0,
+    date : "15-Sep-2018",
+    time : "07:21 pm"
+  },
+   {
+    pa: "Wilson Kumar",
+    seen : false,
+    message : "No classes will be held on 25th Dec",
+    course : "",
+    attachments : 0,
+    date : "15-Sep-2018",
+    time : "07:21 pm"
+  },
+   {
+    pa: "Wilson Kumar",
+    seen : false,
+    message : "Additional course materials available on request",
+    course : "Mathematics 101",
+    attachments : 0,
+    date : "15-Sep-2018",
+    time : "07:21 pm"
+  },
+   {
+    pa: "Wilson Kumar",
+    seen : true,
+    message : "No classes will be held on 21st Nov",
+    course : "",
+    attachments : 2,
+    date : "15-Sep-2018",
+    time : "07:21 pm"
+  }
+]
+
+const announcements_tab = document.getElementsByClassName("announcements-tab");
+announcements.forEach(announcement => {
+   const card = document.createElement("div");
+    card.className = "card" + (announcement.seen ? " seen" : "");
+    
+
+})

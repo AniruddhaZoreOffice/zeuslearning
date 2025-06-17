@@ -4,39 +4,83 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="styles\dashboard.css">
 </head>
 <body>
-    <nav class="navbar" style="padding-left: 24px;">
+    <nav class="navbar" style="padding-left: 24px;padding-right: 24px;">
         <div class="navbar-content">
          <img class="navbar-icon" src="icons\logo used in header.svg" alt="logo">
-         <div class="navbar-tabs">
-          <div class="selected-tab">
+         <div class="right-column">
+          <div class="navbar-tabs">
+          <div class="dashboard-tab clickable">
              DASHBOARD
           </div>
-           CONTENT
-           USERS
-           REPORTS
-           ADMIN
+          <div  class="content-tab clickable current">
+             CONTENT
+          </div>
+          <div class="users-tab clickable">
+             USERS
+          </div>
+          <div class="reports-tab clickable">
+             REPORTS
+          </div>
+          <div class="admin-tab clickable">
+             ADMIN
+          </div>
          </div>
          <div class="icons-group">
-           <div class="notifications">
-                
+           <div class="notifications" style="margin-right:32px;">
+                <div class="count">2</div>
+                <img src="icons\alerts.svg" alt="alert" >
            </div>
-           <div class="announcements">
+           <div class="announcements" style="margin-right:32px;">
+                 <div class="count">1</div>
+                 <img src="icons\announcements.svg" alt="announce">
+                 <div class="announcements-tab">
 
+                 </div>
            </div>
-           <div class="account_circle">
-
+           <div class="account_circle" style="position: relative;">
+                 <div class="count2">T</div>
+                 <img src = "icons\account_circle.svg" alt="account-icon" style="height:32px ;width: 32px;">
            </div>
          </div>
-         <img src="icons\hamburger-menu.svg" >
+         <div class="menu-icon-container" style="display: flex;padding-left:32px;position: relative;" >
+            <img src="icons\hamburger-menu.svg" alt="menu_icon" class="menu" style="width: 40px;" >
+            <div class="menu-container">
+             <div class="menu-item noarrow" onclick="selectMenu(this)">DASHBOARD</div>
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">CONTENT<span class="arrow">▾</span>
+               </div>
+             <div class="submenu">
+               <div class="menu-item" onclick="selectMenu(this)">COURSE CATALOG</div>
+             </div>                 
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">USERS<span class="arrow">▾</span>
+              </div>
+             <div class="submenu">
+               <div class="menu-item" onclick="selectMenu(this)">User List</div>
+               <div class="menu-item" onclick="selectMenu(this)">User Roles</div>
+             </div>                 
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">REPORTS<span class="arrow">▾</span>
+             </div>
+             <div class="submenu">
+               <div class="menu-item" onclick="selectMenu(this)">Monthly</div>
+               <div class="menu-item" onclick="selectMenu(this)">Annual</div>
+             </div>                 
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">ADMIN<span class="arrow">▾</span>
+              </div>
+             <div class="submenu">
+               <div class="menu-item" onclick="selectMenu(this)">Settings</div>
+               <div class="menu-item" onclick="selectMenu(this)">Permissions</div>
+             </div>
         </div>
+          </div>
+        </div>
+         </div>
     </nav>
     <main>
         <div class="cards-container">
           <div class="container-header">
-             <div class="courses-header" style="border-bottom: 4px solid #222222; box-sizing: border-box;">
+             <div class="courses-header selectable active" >
                  <img src="icons\courses.svg">
                  <span style="font-size: 24px;">
                    4
@@ -45,7 +89,7 @@
                    Courses
                  </span>
              </div>
-             <div class="classes-header">
+             <div class="classes-header selectable">
                   <img src="icons\classes.svg">
                  <span style="font-size: 24px;">
                    4
@@ -59,16 +103,15 @@
              <div class="total_courses" style="display: flex;align-items: self-end;">
                Showing 4 of 4 courses
              </div>
-             <div class="sort" style="display: flex;justify-content: end;align-items: center;">
-                <span>
+             <div class="sort" style="display: flex;justify-content: end;align-items: center;float: right;">
+                <span style="margin-top: 10px;">
                    Sort By:
                 </span>
-                <div style="display: flex;">
-                  <span style="padding-right: 54px;color:#333333;border-bottom: 1px solid #ccc;font-size: 16px;margin-left: 6px;display: flex; align-items: center;;">
-                   Course Name
-                </span>
-                
-                <img src="icons\arrow-down.svg" style="border-bottom: 1px solid #ccc;margin-right: 26px;">
+                <div class="custom-select2">
+                  <select name="class" id="dropdown2">
+                    <option value="" disabled selected hidden >Course Name</option>
+                    <option value="">Classes duration</option>
+                  </select>
                 </div>
                 
              </div>

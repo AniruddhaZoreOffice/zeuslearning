@@ -2,35 +2,35 @@
 
 @font-face {
   font-family: 'Quicksand';
-  src: url('Quicksand font 1/Quicksand-VariableFont_wght.ttf') format('truetype');
+  src: url('../Quicksand font 1/Quicksand-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 700; /* Enables weight interpolation for variable font */
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Quicksand';
-  src: url('Quicksand font 1/static/Quicksand-Medium.ttf') format('truetype');
+  src: url('../Quicksand font 1/static/Quicksand-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Quicksand';
-  src: url('Quicksand font 1/static/Quicksand-Light.ttf') format('truetype');
+  src: url('../Quicksand font 1/static/Quicksand-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Quicksand';
-  src: url('Quicksand font 1/static/Quicksand-SemiBold.ttf') format('truetype');
+  src: url('../Quicksand font 1/static/Quicksand-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Quicksand';
-  src: url('Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
+  src: url('../Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
@@ -58,7 +58,7 @@ body {
 }
 .navbar {
   background-color: rgba(0, 0, 0, 1);
-  background-image: url('header pattern image.png');
+  background-image: url('../header pattern image.png');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -192,7 +192,7 @@ main {
 
 .custom-select::after {
   padding-right: 0px;
-  content: url(icons/arrow-down.svg);
+  content: url(../icons/arrow-down.svg);
   position: absolute;
   top: 50%;
   right: 10px;
@@ -294,9 +294,9 @@ font-weight: 600;
     border-bottom: 1px solid #ccc;
 }
 .password-2 input{
-     -webkit-appearance: none; 
-  -moz-appearance: none;    
-  appearance: none;
+-webkit-appearance: none; 
+-moz-appearance: none;    
+appearance: none;
 height: 25px;
 border-bottom: 0px;
 border-top: 0;
@@ -345,7 +345,7 @@ input[type="password"]::-webkit-outer-spin-button {
     font-family: "Quicksand";
     display: flex;
     font-weight: 600;
-    margin-top: 50px;
+    margin-top: 26px;
 }
 
 .submit-button {

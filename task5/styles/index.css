@@ -8,28 +8,28 @@
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand Medium';
   src: url('../Quicksand font 1/static/Quicksand-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand Light';
   src: url('../Quicksand font 1/static/Quicksand-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand SemiBold';
   src: url('../Quicksand font 1/static/Quicksand-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand Bold';
   src: url('../Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
@@ -50,7 +50,6 @@ body {
   display: flex;
   flex-direction: column;
   background-color: #EEEEEE;
-  font-family: Quicksand;
 }
 
 .main-content {
@@ -95,7 +94,7 @@ main {
 
 .loginCardTitle {
     display: flex;
-    font-family: 'Quicksand' ;
+    font-family: 'Quicksand Medium' ;
     font-weight: 600;
     font-size: 24px;
     letter-spacing: 0px;
@@ -119,7 +118,7 @@ main {
   display: inline-block;
   width: 24px;
   height: 24px;
-  background-image: url('icons\radio-button-off.svg');
+  background-image: url('../icons/radio-button-off.svg');
   background-size: cover;
   margin-right: 10px;
   vertical-align: middle;
@@ -127,7 +126,7 @@ main {
 }
 
 .custom-radio input[type="radio"]:checked + .radio-btn {
-  background-image: url('icons\radio-button-on.svg');
+  background-image: url('../icons/radio-button-on.svg');
 }
 
 .custom-radio {

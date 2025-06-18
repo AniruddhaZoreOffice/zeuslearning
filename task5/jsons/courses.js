@@ -78,5 +78,3 @@ export const courses = [
         "favourite": true, 
         "dashboard": true } }
 ]
-
-module.exports = courses;

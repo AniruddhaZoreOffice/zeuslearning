@@ -1,14 +1,14 @@
 
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand Bold';
   src: url('../Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
   font-weight: 100 700;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand Medium';
   src: url('../Quicksand font 1/static/Quicksand-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
@@ -22,14 +22,14 @@
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand SemiBold';
   src: url('../Quicksand font 1/static/Quicksand-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Quicksand';
+  font-family: 'Quicksand Bold';
   src: url('../Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
@@ -105,11 +105,17 @@ body {
 }
 
 .notifications{
+  display: flex;
+  align-items: center;
   position: relative;
+  height: 100%;
 }
 
 .announcements {
   position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 .notifications img{
   height: 30px;
@@ -121,10 +127,55 @@ body {
   width: 26px;
 }
 
-.count{
+.announcements-tab,.alerts-tab{
+  position: absolute;
+  display: none;
+  background: #000;
+  top: 56px;
+  right: -7px;
+  width:315px;
+  max-height: 582px;
+  z-index: 10;
+  font-family: 'Quicksand Light';
+  box-shadow: 0px 3px 6px #00000029;
+}
+
+.announcements-tab2,.alerts-tab2{
+  overflow-y: auto;
+  max-height: 534px;
+}
+
+
+.announcementseen,.alertseen{
+padding: 16px;
+background: #FFFFFF;
+}
+
+.announcementunseen,.alertunseen{
+background: #FFFFEE;
+padding: 16px;
+border-top: 1px solid #2222221F;
+}
+
+.announcements-options,.alerts-options{
+  font-size: 14px;
+  color:#1F7A54;
+  background-color: #FFFFFF;
+  display: flex;
+  height: 48px;
+}
+
+.options-div{
+  width: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.count,.count1{
    position: absolute;
-  top: -4px; 
-  right: -5px; 
+  top: 8px; 
+  right: -4px; 
   width: 17px;
   height: 17px;
   text-align: center;
@@ -277,6 +328,11 @@ border-bottom: 1px solid #ccc;
 
 .course-subheader div{
 width: 50%;
+}
+
+.card-footer span{
+display: flex;
+align-items: center;
 }
 
 .selectable {
@@ -464,7 +520,7 @@ width: 280px;
 
 .custom-select2::after {
   padding-right: 0px;
-  content: url(icons/arrow-down.svg);
+  content: url(../icons/arrow-down.svg);
   position: absolute;
   top: 50%;
   right: 0px;

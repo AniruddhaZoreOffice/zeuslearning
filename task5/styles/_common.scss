@@ -1,0 +1,30 @@
+@font-face {
+  font-family: 'Quicksand';
+  src: url('../Quicksand font 1/Quicksand-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 700;
+  font-display: optional;
+}
+
+
+* {
+  font-family: 'Quicksand';
+  font-weight: 500;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+body {
+  height: 100%;
+   margin: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #EEEEEE;
+}
+
+.main-content {
+  flex: 1;
+}

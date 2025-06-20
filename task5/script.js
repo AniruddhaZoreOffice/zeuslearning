@@ -229,29 +229,29 @@ if (course.dropdownOptions.length > 0) {
 
     card.innerHTML = `
     
-    <div class="course-details" style="padding-bottom:16px;border-bottom:1px solid #ccc;margin-right:24px;font-family:'Quicksand';font-weight:600px;">
+    <div class="course-details" style="padding-bottom:16px;border-bottom:1px solid #ccc;margin-right:24px;font-family:'Quicksand';font-weight:500px;">
     <div class="image-div">
     <img src="${course.image}" alt="${course.title}" style="border-radius: 2px;">
     </div>
     <div class="specifications">
     <div style="display:flex; align-items:flex-start;">
-       <div class="card-title" style="font-size:16px;width:260px;font-weight:600px;">${course.title}</div>
+       <div class="card-title" style="font-size:16px;width:260px;font-weight:500px;">${course.title}</div>
        ${course.star ? '<img src = "icons/favourite.svg" class="star-icon" >' : ''}
     </div>
     <div style="display:flex; margin-top:10px;">
-       <div class="info" style="font-size:12px;font-weight:600px;color:#666666">${course.subject}</div>
-       <div class="info" style="font-size:12px;margin-left: 18px;display:flex;font-weight:600px;color:#666666" >Grade  ${course.grade} <div style="color:#1F7A54;margin-left:2px;"> ${course.additional}</div></div>
+       <div class="info" style="font-size:12px;font-weight:500px;color:#666666">${course.subject}</div>
+       <div class="info" style="font-size:12px;margin-left: 18px;display:flex;font-weight:500px;color:#666666" >Grade  ${course.grade} <div style="color:#1F7A54;margin-left:2px;"> ${course.additional}</div></div>
     </div>
       <div style="display:flex; margin-top: 5px; ">
-        ${course.units ? `<div class="info" style="font-size:12px;display:flex;"><strong>${course.units}</strong><div style="font-weight:600px;margin-left:2px;color:#666666">Units</div> </div>` : ''}
-        ${course.lessons ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;"><strong>${course.lessons}</strong> <div style="font-weight:600px;margin-left:2px;color:#666666">Lessons</div></div>` : ''}
-        ${course.topics ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;"><strong>${course.topics}</strong> <div style="font-weight:600px;margin-left:2px;color:#666666">Topics</div></div>` : ''}
+        ${course.units ? `<div class="info" style="font-size:12px;display:flex;font-wieght:700px;">${course.units}<div style="font-weight:500px;margin-left:2px;color:#666666">Units</div> </div>` : ''}
+        ${course.lessons ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;font-wieght:700px;">${course.lessons} <div style="font-weight:500px;margin-left:2px;color:#666666">Lessons</div></div>` : ''}
+        ${course.topics ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;font-wieght:700px;">${course.topics} <div style="font-weight:500px;margin-left:2px;color:#666666">Topics</div></div>` : ''}
       </div>
        ${dropdownHTML}
       <div style="display:flex; margin-top: 5px;">
-        ${course.students ? `<div class="info" style="font-size:12px;font-weight:600px;color:#666666">${course.students} Students</div>` : ''}
-        ${course.startdate ? `<div class="info" style="font-size:12px; margin-left:17px;font-weight:600px;color:#666666">${course.startdate} - </div>` : ''}
-        ${course.enddate ? `<div class="info" style="font-size:12px; margin-left:2px;font-weight:600px;color:#666666">${course.enddate}</div>` : ''}
+        ${course.students ? `<div class="info" style="font-size:12px;font-weight:500px;color:#666666">${course.students} Students</div>` : ''}
+        ${course.startdate ? `<div class="info" style="font-size:12px; margin-left:17px;font-weight:500px;color:#666666">${course.startdate} - </div>` : ''}
+        ${course.enddate ? `<div class="info" style="font-size:12px; margin-left:2px;font-weight:500px;color:#666666">${course.enddate}</div>` : ''}
       </div>
 
     </div>

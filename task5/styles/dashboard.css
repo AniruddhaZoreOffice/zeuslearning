@@ -1,42 +1,16 @@
 
 
 @font-face {
-  font-family: 'Quicksand Bold';
-  src: url('../Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
+  font-family: 'Quicksand';
+  src: url('../Quicksand font 1/Quicksand-VariableFont_wght.ttf') format('truetype');
   font-weight: 100 700;
-  font-style: normal;
+  font-display: optional;
 }
 
-@font-face {
-  font-family: 'Quicksand Medium';
-  src: url('../Quicksand font 1/static/Quicksand-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Quicksand Light';
-  src: url('../Quicksand font 1/static/Quicksand-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Quicksand SemiBold';
-  src: url('../Quicksand font 1/static/Quicksand-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Quicksand Bold';
-  src: url('../Quicksand font 1/static/Quicksand-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-}
 
 * {
-  font-weight: 600;
+  font-family: 'Quicksand';
+  font-weight: 500;
 }
 
 html {
@@ -89,7 +63,7 @@ body {
 }
 .navbar-tabs{
   display: flex;
-  font-family: 'Quicksand Light';
+  
   font-size: 14px;
   align-items: center;
 }
@@ -136,7 +110,6 @@ body {
   width:315px;
   max-height: 582px;
   z-index: 10;
-  font-family: 'Quicksand Light';
   box-shadow: 0px 3px 6px #00000029;
 }
 
@@ -162,7 +135,9 @@ border-top: 1px solid #2222221F;
   color:#1F7A54;
   background-color: #FFFFFF;
   display: flex;
-  height: 48px;
+  height: 30px;
+  padding-top: 9px;
+  padding-bottom: 9px;
 }
 
 .options-div{
@@ -179,7 +154,6 @@ border-top: 1px solid #2222221F;
   width: 17px;
   height: 17px;
   text-align: center;
-  font-family: 'Quicksand light';
   font-size: 12px;
   border-radius: 50%;
   background-color: #2A7FF3;
@@ -194,7 +168,7 @@ border-top: 1px solid #2222221F;
   width: 16px;
 height: 16px;
   text-align: center;
-  font-family: 'Quicksand light';
+  
   font-size: 8px;
   border-radius: 50%;
   background-color: #FFFFFF;
@@ -223,8 +197,6 @@ height: 100%;
 }
 
 .menu-container{
-  font-family: 'Quicksand Light';
-  font-size: 14px;
   display:none;
   position: absolute;
   top: 56px;
@@ -232,17 +204,20 @@ height: 100%;
   box-shadow: 0px 13px 20px #0000003D;
   right: 0;
   z-index: 10;
+  color: #2d7a46;
+  font-size: 14px;
+  font-weight: 500;
 }
 
     .menu-item {
+  font-size: 14px;
+  font-weight: 500;
   padding-left: 16px;
   padding-right: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  color: #2d7a46;
-  font-weight: bold;
   height: 46px;
   background-color: #ffffff; 
   transition: background-color 0.2s;
@@ -261,11 +236,11 @@ height: 100%;
 .submenu {
   display: none;
   background-color: #f3f3f3;
+  color: #2d7a46;
 }
 
 .submenu .menu-item {
   padding-left: 40px;
-  font-weight: bold;
   background-color: #f3f3f3;
 }
 
@@ -290,7 +265,7 @@ height: 100%;
 .cards-container {
 position: relative;
 width: 976px;
-font-family: 'Quicksand';
+
 }
 
 
@@ -377,7 +352,7 @@ align-items: center;
   padding-right: 7px;
   top: 0px;
   left: 0;
-  font-family: 'Quicksand';
+  
   color: #D80000;
   background-color: #FFE4E6;
   font-size: 12px;
@@ -409,7 +384,7 @@ width: 280px;
 
 .custom-select {
   position: relative;
-  font-family: 'Quicksand';
+  
   margin-right: 20px;
   color:#222222;
 }
@@ -451,7 +426,7 @@ width: 280px;
  height: 45px;
  width: 100%;
  font-weight: 600;
- font-family: 'Quicksand';
+ 
  margin-left: 1px;
  font-size: 16px; 
  line-height: 1.5; 
@@ -487,7 +462,7 @@ width: 280px;
 
 
 #dropdown2{
-  font-family: 'Quicksand';
+  
   background-color: #EEEEEE;
   margin-left: 6px;
   font-size: 16px; 
@@ -513,7 +488,7 @@ width: 280px;
 
 .custom-select2 {
   position: relative;
-  font-family: 'Quicksand';
+  
   margin-right: 20px;
   color:#222222;
 }
@@ -534,7 +509,7 @@ footer {
     margin-top: 30px;
 }
 .about-section{
-font-family: 'Quicksand';
+
 font-size: 14px;
 color:#1F7A54;
 height: 34px;
@@ -545,7 +520,7 @@ justify-content: center;
 }
 
 .end{
-    font-family: 'Quicksand';
+    
     display:flex;
     justify-content: center;
     align-items: center;

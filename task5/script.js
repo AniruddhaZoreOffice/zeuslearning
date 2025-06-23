@@ -21,6 +21,7 @@ image.addEventListener('mouseleave', hideDiv);
 hiddenDiv.addEventListener('mouseleave', hideDiv);
 
 
+
 // code to hover on announcements
 const announcemen_container = document.querySelector('.announcements')
 const announcemen_icon = document.querySelector('.announcement-icon');
@@ -236,11 +237,11 @@ if (course.dropdownOptions.length > 0) {
     <div class="specifications">
     <div style="display:flex; align-items:flex-start;">
        <div class="card-title" style="font-size:16px;width:260px;font-weight:500px;">${course.title}</div>
-       ${course.star ? '<img src = "icons/favourite.svg" class="star-icon" >' : ''}
+       ${course.star ? '<img src = "icons/favourite.svg" class="star-icon" >' : '<img src = "icons/favourite.svg" style="filter: grayscale(1)" class="star-icon" >'}
     </div>
     <div style="display:flex; margin-top:10px;">
-       <div class="info" style="font-size:12px;font-weight:500px;color:#666666">${course.subject}</div>
-       <div class="info" style="font-size:12px;margin-left: 18px;display:flex;font-weight:500px;color:#666666" >Grade  ${course.grade} <div style="color:#1F7A54;margin-left:2px;"> ${course.additional}</div></div>
+       <div class="info" style="font-size:12px;color:#666666;border-right: 1px solid #ccc;height:13px;padding-right: 9px;">${course.subject}</div>
+       <div class="info" style="font-size:12px;margin-left: 9px;display:flex;font-weight:500px;color:#666666;" >Grade  ${course.grade} <div style="color:#1F7A54;margin-left:2px;"> ${course.additional}</div></div>
     </div>
       <div style="display:flex; margin-top: 5px; ">
         ${course.units ? `<div class="info" style="font-size:12px;display:flex;font-wieght:700px;">${course.units}<div style="font-weight:500px;margin-left:2px;color:#666666">Units</div> </div>` : ''}
@@ -249,14 +250,14 @@ if (course.dropdownOptions.length > 0) {
       </div>
        ${dropdownHTML}
       <div style="display:flex; margin-top: 5px;">
-        ${course.students ? `<div class="info" style="font-size:12px;font-weight:500px;color:#666666">${course.students} Students</div>` : ''}
-        ${course.startdate ? `<div class="info" style="font-size:12px; margin-left:17px;font-weight:500px;color:#666666">${course.startdate} - </div>` : ''}
-        ${course.enddate ? `<div class="info" style="font-size:12px; margin-left:2px;font-weight:500px;color:#666666">${course.enddate}</div>` : ''}
+        ${course.students ? `<div class="info" style="font-size:12px;font-weight:500px;color:#666666;margin-right:9px;">${course.students} Students</div>` : ''}
+        ${course.startdate ? `<div class="info" style="font-size:12px; padding-left:9px;border-left: 1px solid #ccc;height:13px;color:#666666">${course.startdate} - </div>` : ''}
+        ${course.enddate ? `<div class="info" style="font-size:12px; margin-left:2px;color:#666666">${course.enddate}</div>` : ''}
       </div>
 
     </div>
     </div>
-    <div style="padding-left:24px;padding-right:24px;display:flex;gap:100px;margin-top:18px;padding-bottom:9px;" class="card-footer">${iconsHTML}</div>
+    <div style="padding-left:24px;padding-right:24px;display:flex;gap:100px;margin-top:18px;padding-bottom:9px;justify-content:center;" class="card-footer">${iconsHTML}</div>
     `;
 
     const wrapper = document.createElement("div");

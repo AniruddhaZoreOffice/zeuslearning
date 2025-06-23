@@ -6,7 +6,7 @@
 }
 * {
   font-family: "Quicksand";
-  font-weight: 500;
+  font-weight: 550;
 }
 
 html {
@@ -55,7 +55,6 @@ main {
 
 .login-card {
   width: 488px;
-  margin-top: 60px;
   border-top: 4px solid #3AC7EC;
   background: #FFFFFF;
   position: relative;

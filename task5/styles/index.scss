@@ -30,7 +30,6 @@ main {
 
 .login-card{
    width: 488px;
-   margin-top: 60px;;
    border-top: 4px solid #3AC7EC;
    background: #FFFFFF ;
    position: relative;
@@ -149,13 +148,12 @@ main {
   font-size: 16px; 
   line-height: 1.5; 
   padding-top: 10px; 
-
 }
 
 #district {
-  -webkit-appearance: none; 
-  -moz-appearance: none;    
-  appearance: none;         
+ -webkit-appearance: none; 
+ -moz-appearance: none;    
+ appearance: none;         
  border-bottom: 1px solid #ccc ;
  border-top: 0;
  border-left: 0;
@@ -185,28 +183,28 @@ main {
     
 }
 .username input{
-height: 25px;
-border-bottom: 1px solid #ccc;
-border-top: 0;
-border-left: 0;
-border-right: 0;
-font-size: 16px;
-width: 100%;
+  height: 25px;
+  border-bottom: 1px solid #ccc;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  font-size: 16px;
+  width: 100%;
 }
 
 input::placeholder{
-color: #666666;
+  color: #666666;
 
 }
 .username div{
-    float: right;
-    font-size: 14px;
-    color: #1F7A54;
-    margin-top: 5px;
+  float: right;
+  font-size: 14px;
+  color: #1F7A54;
+  margin-top: 5px;
 }
 
 .username input:focus {
- border-color: #007bff; 
+  border-color: #007bff; 
   outline: none; 
   box-shadow: none;
 }

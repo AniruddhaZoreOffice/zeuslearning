@@ -243,21 +243,21 @@ if (course.dropdownOptions.length > 0) {
        <div class="info" style="font-size:12px;color:#666666;border-right: 1px solid #ccc;height:13px;padding-right: 9px;">${course.subject}</div>
        <div class="info" style="font-size:12px;margin-left: 9px;display:flex;font-weight:500px;color:#666666;" >Grade  ${course.grade} <div style="color:#1F7A54;margin-left:2px;"> ${course.additional}</div></div>
     </div>
-      <div style="display:flex; margin-top: 5px; ">
+      <div style="display:flex; margin-top: 5px; " class="card-units">
         ${course.units ? `<div class="info" style="font-size:12px;display:flex;font-wieght:700px;">${course.units}<div style="font-weight:500px;margin-left:2px;color:#666666">Units</div> </div>` : ''}
         ${course.lessons ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;font-wieght:700px;">${course.lessons} <div style="font-weight:500px;margin-left:2px;color:#666666">Lessons</div></div>` : ''}
         ${course.topics ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;font-wieght:700px;">${course.topics} <div style="font-weight:500px;margin-left:2px;color:#666666">Topics</div></div>` : ''}
       </div>
        ${dropdownHTML}
-      <div style="display:flex; margin-top: 5px;">
+      <div style="display:flex; margin-top: 5px;" class="card-units2">
         ${course.students ? `<div class="info" style="font-size:12px;font-weight:500px;color:#666666;margin-right:9px;">${course.students} Students</div>` : ''}
-        ${course.startdate ? `<div class="info" style="font-size:12px; padding-left:9px;border-left: 1px solid #ccc;height:13px;color:#666666">${course.startdate} - </div>` : ''}
-        ${course.enddate ? `<div class="info" style="font-size:12px; margin-left:2px;color:#666666">${course.enddate}</div>` : ''}
+        ${course.startdate ? `<div class="info" id="startdatetab"style="font-size:12px; height:13px;color:#666666">${course.startdate} - </div>` : ''}
+        ${course.enddate ? `<div class="info" id="enddatetab" style="font-size:12px; margin-left:2px;color:#666666">${course.enddate}</div>` : ''}
       </div>
 
     </div>
     </div>
-    <div style="padding-left:24px;padding-right:24px;display:flex;gap:100px;margin-top:18px;padding-bottom:9px;justify-content:center;" class="card-footer">${iconsHTML}</div>
+    <div class="card-footer">${iconsHTML}</div>
     `;
 
     const wrapper = document.createElement("div");
@@ -431,10 +431,10 @@ alerts.forEach(alert => {
     </div>
     </div>
     <div style="font-size:12px;color:#6E6E6E;">
-       ${alert.course ? `<div style="margin-top:8px;display:flex;">Course : <div style="#222222"> &nbsp${alert.course}</div></div>` : ''}
+       ${alert.course ? `<div style="margin-top:8px;display:flex;">Course : <div style="color:#222222;"> &nbsp${alert.course}</div></div>` : ''}
     </div>
-    <div style="font-size:12px;color:#6E6E6E";">
-       ${alert.class ? `<div style="margin-top:8px;display:flex;">Class : <div style="#222222"> &nbsp${alert.class}</div></div>` : ''}
+    <div style="font-size:12px;color:#6E6E6E;";">
+       ${alert.class ? `<div style="margin-top:8px;display:flex;">Class : <div style="color:#222222;"> &nbsp<strong>${alert.class}</strong></div></div>` : ''}
     </div>
     <div style="font-size:12px;color:#6E6E6E;margin-top:8px;display:flex;justify-content:flex-end;align-items:center;">
      ${alert.date} at ${alert.time} 

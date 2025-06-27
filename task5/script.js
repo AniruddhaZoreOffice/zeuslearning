@@ -107,18 +107,37 @@ function togglePassword() {
     } )
  }
  )
+document.addEventListener("DOMContentLoaded", function () {
+  const menuItems = document.querySelectorAll(".menu-item.has-submenu");
 
-function toggleMenu(element) {
-    element.classList.toggle("active");
-  }
+  menuItems.forEach(item => {
+    item.addEventListener("click", function () {
+      
+      const isActive = item.classList.contains("active");
 
-  function selectMenu(selectedItem) {
-    
-    const allItems = document.querySelectorAll(".menu-item");
-    allItems.forEach(item => item.classList.remove("selected"));
+      menuItems.forEach(otherItem => {
+        if (otherItem !== item && otherItem.classList.contains("active")) {
+          otherItem.classList.remove("active");
+          otherItem.nextElementSibling.style.display = "none";
+        }
+      });
 
-    selectedItem.classList.add("selected");
-  }
+      const submenu = item.nextElementSibling;
+      if (submenu && submenu.classList.contains("submenu")) {
+        if (isActive) {
+          item.classList.remove("active");
+          submenu.style.display = "none";
+        } else {
+          item.classList.add("active");
+          submenu.style.display = "block";
+        }
+      }
+    });
+  });
+
+
+});
+
 
 const courses = [
     { Expired : false,
@@ -230,37 +249,51 @@ if (course.dropdownOptions.length > 0) {
 
     card.innerHTML = `
     
-    <div class="course-details" style="padding-bottom:16px;border-bottom:1px solid #ccc;margin-right:24px;font-family:'Quicksand';font-weight:500px;">
-    <div class="image-div">
-    <img src="${course.image}" alt="${course.title}" style="border-radius: 2px;">
-    </div>
-    <div class="specifications">
-    <div style="display:flex; align-items:flex-start;">
-       <div class="card-title" style="font-size:16px;width:260px;font-weight:500px;">${course.title}</div>
-       ${course.star ? '<img src = "icons/favourite.svg" class="star-icon" >' : '<img src = "icons/favourite.svg" style="filter: grayscale(1)" class="star-icon" >'}
-    </div>
-    <div style="display:flex; margin-top:10px;">
-       <div class="info" style="font-size:12px;color:#666666;border-right: 1px solid #ccc;height:13px;padding-right: 9px;">${course.subject}</div>
-       <div class="info" style="font-size:12px;margin-left: 9px;display:flex;font-weight:500px;color:#666666;" >Grade  ${course.grade} <div style="color:#1F7A54;margin-left:2px;"> ${course.additional}</div></div>
-    </div>
-      <div style="display:flex; margin-top: 5px; " class="card-units">
-        ${course.units ? `<div class="info" style="font-size:12px;display:flex;font-wieght:700px;">${course.units}<div style="font-weight:500px;margin-left:2px;color:#666666">Units</div> </div>` : ''}
-        ${course.lessons ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;font-wieght:700px;">${course.lessons} <div style="font-weight:500px;margin-left:2px;color:#666666">Lessons</div></div>` : ''}
-        ${course.topics ? `<div class="info" style="font-size:12px; margin-left:6px;display:flex;font-wieght:700px;">${course.topics} <div style="font-weight:500px;margin-left:2px;color:#666666">Topics</div></div>` : ''}
+    <div class="course-details">
+      <div class="image-div">
+        <img src="${course.image}" alt="${course.title}" class="course-image">
       </div>
-       ${dropdownHTML}
-      <div style="display:flex; margin-top: 5px;" class="card-units2">
-        ${course.students ? `<div class="info" style="font-size:12px;font-weight:500px;color:#666666;margin-right:9px;">${course.students} Students</div>` : ''}
-        ${course.startdate ? `<div class="info" id="startdatetab"style="font-size:12px; height:13px;color:#666666">${course.startdate} - </div>` : ''}
-        ${course.enddate ? `<div class="info" id="enddatetab" style="font-size:12px; margin-left:2px;color:#666666">${course.enddate}</div>` : ''}
+      <div class="specifications">
+        <div class="header-row">
+          <div class="card-title">${course.title}</div>
+          ${course.star 
+            ? '<img src="icons/favourite.svg" class="star-icon">' 
+            : '<img src="icons/favourite.svg" class="star-icon grayscale">'
+          }
+        </div>
+        <div class="course-meta">
+          <div class="info subject" style="width:fit-content;">${course.subject}</div>
+          <div class="info grade" style="width:fit-content;">Grade <div class="grade-count">${course.grade}</div> <div class="additional">${course.additional}</div></div>
+        </div>
+        <div class="card-units">
+          ${course.units 
+            ? `<div class="info units" style="width:fit-content;">${course.units}<div class="label">Units</div></div>` 
+            : ''}
+          ${course.lessons 
+            ? `<div class="info lessons" style="width:fit-content;">${course.lessons}<div class="label">Lessons</div></div>` 
+            : ''}
+          ${course.topics 
+            ? `<div class="info topics">${course.topics}<div class="label">Topics</div></div>` 
+            : ''}
+        </div>
+        ${dropdownHTML}
+        <div class="card-units2">
+          ${course.students 
+            ? `<div class="info students" style="width:fit-content;">${course.students} Students</div>` 
+            : ''}
+          ${course.startdate 
+            ? `<div class="info startdate" id="startdatetab" style="width:fit-content;">${course.startdate} - </div>` 
+            : ''}
+          ${course.enddate 
+            ? `<div class="info enddate" id="enddatetab" style="width:fit-content;">${course.enddate}</div>` 
+            : ''}
+        </div>
       </div>
-
-    </div>
     </div>
     <div class="card-footer">${iconsHTML}</div>
     `;
 
-    const wrapper = document.createElement("div");
+  const wrapper = document.createElement("div");
   wrapper.className = "card-wrapper";
   if (course.Expired) {
     wrapper.innerHTML = `<div class="expired-label">Expired</div>`;
@@ -339,7 +372,7 @@ announcements.forEach(announcement => {
       ${announcement.pa}
       </div>
       </div>
-      ${announcement.seen ? '<img src = "icons/tick_icon.png" class="seen-icon" style="width:15px;height:15px;">' : '<img src = "icons/minus.svg" class="seen-icon" style="width:15px;height:15px;">'}
+      ${announcement.seen ? '<img src = "icons/tick_icon.png" class="seen-icon" style="width:18px;height:18px;">' : '<img src = "icons/minus.svg" class="seen-icon" style="width:18px;height:18px;">'}
     </div>
     <div style="color:#222222;font-size:14px;margin-top:8px;">
     ${announcement.message}
@@ -422,12 +455,12 @@ alerts.forEach(alert => {
     card2.className = "alert" + (alert.seen ? "seen" : "unseen");
         
     card2.innerHTML = `
-    <div style="display:flex;justify-content:space-between;align-items:center">
-    <div style="color:#222222;font-size:14px;margin-top:8px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+    <div style="color:#222222;font-size:14px;">
     ${alert.message}
     </div>
     <div>
-        ${alert.seen ? '<img src = "icons/tick_icon.png" class="seen-icon" style="width:15px;height:15px;">' : '<img src = "icons/minus.svg" class="seen-icon" style="width:15px;height:15px;">'}
+        ${alert.seen ? '<img src = "icons/tick_icon.png" class="seen-icon" style="width:18px;height:18px;">' : '<img src = "icons/minus.svg" class="seen-icon" style="width:18px;height:18px;">'}
     </div>
     </div>
     <div style="font-size:12px;color:#6E6E6E;">

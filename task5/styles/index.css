@@ -28,9 +28,8 @@ body {
 }
 
 .navbar {
+  background-color: rgb(0, 0, 0);
   background-image: url("../header pattern image.png");
-  background-color: rgba(0, 0, 0, 0.5);
-  background-blend-mode: multiply;
   background-size: cover;
   background-position: center;
   display: flex;

@@ -14,7 +14,7 @@
     >
 </head>
 <body>
-    <nav class="navbar" style="padding-left: 24px;">
+    <nav class="navbar" >
         <div class="navbar-content">
          <img class="navbar-icon" src="icons\logo used in header.svg" alt="logo">
          <div class="right-column">
@@ -36,7 +36,7 @@
           </div>
          </div>
          <div class="icons-group">
-           <div class="notifications" style="margin-right:32px;">
+           <div class="notifications">
                 <div class="count">2</div>
                 <img src="icons\alerts.svg" alt="alert" class="alert-icon">
                 <div class="alerts-tab">
@@ -44,13 +44,13 @@
 
                   </div>
                   <div class="alerts-options">
-                   <div style="display: flex;align-items: center;justify-content: center;width:100%;" >
+                   <div class="show-all-option" >
                       SHOW ALL
                    </div>
                   </div>
                  </div>
            </div>
-           <div class="announcements" style="margin-right:32px;" >
+           <div class="announcements" >
                  <div class="count1">1</div>
                  <img src="icons\announcements.svg" class="announcement-icon " alt="announce">
                  <div class="announcements-tab">
@@ -58,7 +58,7 @@
 
                   </div>
                   <div class="announcements-options">
-                   <div class="options-div" style="border-right: 1px solid #0000001F">
+                   <div class="options-div" id="option-div--withborder">
                       SHOW ALL
                    </div>
                    <div class="options-div">
@@ -67,33 +67,33 @@
                   </div>
                  </div>
            </div>
-           <div class="account_circle" style="position: relative;">
+           <div class="account-circle" >
                  <div class="count2">T</div>
-                 <img src = "icons\account_circle.svg" alt="account-icon" style="height:32px ;width: 32px;">
+                 <img src = "icons\account_circle.svg" alt="account-icon" class="account-icon">
            </div>
          </div>
-         <div class="menu-icon-container" style="display: flex;padding-left:32px;position: relative;" >
-            <img src="icons\hamburger-menu.svg" alt="menu_icon" class="menu" style="width: 40px;" >
+         <div class="menu-icon-container"  >
+            <img src="icons\hamburger-menu.svg" alt="menu_icon" class="menu"  >
             <div class="menu-container">
              <div class="menu-item noarrow" onclick="selectMenu(this)">DASHBOARD</div>
-             <div class="menu-item has-submenu" onclick="toggleMenu(this)">CONTENT<span class="arrow">▾</span>
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">CONTENT<span class="arrow"><img src="icons/arrow_down2.svg" class="menu-arrow" ></span>
                </div>
              <div class="submenu">
                <div class="menu-item" onclick="selectMenu(this)">COURSE CATALOG</div>
              </div>                 
-             <div class="menu-item has-submenu" onclick="toggleMenu(this)">USERS<span class="arrow">▾</span>
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">USERS<span class="arrow"><img src="icons/arrow_down2.svg" class="menu-arrow" ></span>
               </div>
              <div class="submenu">
                <div class="menu-item" onclick="selectMenu(this)">User List</div>
                <div class="menu-item" onclick="selectMenu(this)">User Roles</div>
              </div>                 
-             <div class="menu-item has-submenu" onclick="toggleMenu(this)">REPORTS<span class="arrow">▾</span>
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">REPORTS<span class="arrow"><img src="icons/arrow_down2.svg" class="menu-arrow" ></span>
              </div>
              <div class="submenu">
                <div class="menu-item" onclick="selectMenu(this)">Monthly</div>
                <div class="menu-item" onclick="selectMenu(this)">Annual</div>
              </div>                 
-             <div class="menu-item has-submenu" onclick="toggleMenu(this)">ADMIN<span class="arrow">▾</span>
+             <div class="menu-item has-submenu" onclick="toggleMenu(this)">ADMIN<span class="arrow"><img src="icons/arrow_down2.svg" class="menu-arrow" ></span>
               </div>
              <div class="submenu">
                <div class="menu-item" onclick="selectMenu(this)">Settings</div>
@@ -109,7 +109,7 @@
           <div class="container-header">
              <div class="courses-header selectable active" >
                  <img src="icons\courses.svg">
-                 <span style="font-size: 24px;">
+                 <span style="font-size: 24px;margin-right: 6px;">
                    4
                  </span>
                  <span>
@@ -118,20 +118,21 @@
              </div>
              <div class="classes-header selectable">
                   <img src="icons\classes.svg">
-                 <span style="font-size: 24px;">
+                 <span style="font-size: 24px;margin-left:16px;">
                    4
                  </span>
-                 <span>
+                 <span >
                    Classes
                  </span>
              </div>
           </div>
           <div class="course-subheader">
-             <div class="total_courses" style="display: flex;align-items: self-end;">
+             <div class="total-courses" style="display: flex;align-items: end;">
                Showing 4 of 4 courses
              </div>
-             <div class="sort" style="display: flex;justify-content: end;align-items: center;float: right;">
-                <span style="margin-top: 10px;">
+             <div class="sort" >
+              <div style="display: flex;align-items: center;">
+                   <span>
                    Sort By:
                 </span>
                 <div class="custom-select2">
@@ -140,9 +141,9 @@
                     <option value="">Classes duration</option>
                   </select>
                 </div>
-                
+              </div>
+                <img src ="icons\sort.svg">
              </div>
-             <img src ="icons\sort.svg">
           </div>
           <div id="courses">
             
@@ -159,7 +160,8 @@
             <div style="padding-right: 16px;border-right: 2px solid #ccc;">
                  <img src="icons\logo used in footer.svg" alt="footer-logo" style="height: 20px;">
             </div>
-           <div style="padding-left: 16px;">
+          <div style="display: flex;">
+            <div style="padding-left: 16px;">
                Copyright © 2020-2021
            </div >
            <div style="padding-left:8px;font-weight: 700;">
@@ -168,6 +170,7 @@
            <div style="padding-left:11px">
             All rights reserved.
            </div>
+            </div>
         </div>
 
         </div>

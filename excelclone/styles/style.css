@@ -1,0 +1,49 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.grid-container {
+  position: relative;
+  overflow: scroll;
+  overflow: auto;
+  background: white;
+}
+
+.corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #f3f3f3;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+  font-weight: bold;
+  z-index: 20;
+}
+
+.column-bar {
+  position: absolute;
+  background: #f3f3f3;
+  border-bottom: 1px solid #ccc;
+  overflow: hidden;
+  display: flex;
+  z-index: 10;
+}
+
+.row-bar {
+  position: absolute;
+  background: #f3f3f3;
+  border-right: 1px solid #ccc;
+  overflow: hidden;
+  z-index: 10;
+}
+
+
+.canvas-grid {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none; 
+}

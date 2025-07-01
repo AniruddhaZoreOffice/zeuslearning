@@ -1,169 +1,121 @@
-var container = document.querySelector(".container");
-var canvas = document.getElementById("canvas");
-var rowBarCanvas = document.getElementById("rowBarCanvas");
-var columnBarCanvas = document.getElementById("columnBarCanvas");
-var ctx = canvas.getContext("2d");
-var rowBarCtx = rowBarCanvas.getContext("2d");
-var columnBarCtx = columnBarCanvas.getContext("2d");
-var ratio = window.devicePixelRatio;
-var cellHeight = 19;
-var cellWidth = 63;
+var container = document.querySelector('.container');
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+var cellWidth = 63.5;
+var cellHeight = 19.5;
 var totalCols = 500;
 var totalRows = 100000;
-var canvasHeight = canvas.height;
-var canvasWidth = canvas.width;
-var cell = /** @class */ (function () {
-    function cell(row, col, value) {
+var ratio = window.devicePixelRatio || 1;
+//class : Cell
+var Cell = /** @class */ (function () {
+    function Cell(row, col, val) {
         this.row = row;
         this.col = col;
-        this.value = value;
-        this.focused = false;
-        this.editing = false;
+        this.value = val;
     }
-    return cell;
+    return Cell;
 }());
-var allCells = [];
+var cells = [];
 function generateCells() {
-    for (var i = 0; i < totalRows; i++) {
-        allCells[i] = [];
-        for (var j = 0; j < totalCols; j++) {
-            var cell1 = new cell(i, j, "");
-            allCells[i][j] = cell1;
+    for (var i = 1; i <= totalRows; i++) {
+        for (var j = 1; j <= totalCols; j++) {
+            cells[i][j] = new Cell(i, j, "");
         }
     }
 }
-function syncCanvasPosition() {
-    canvas.style.top = container.scrollTop + "px";
-    canvas.style.left = container.scrollLeft + "px";
+// Sync canvas size with container 
+function syncCanvasSize() {
+    var width = container.clientWidth;
+    var height = container.clientHeight;
+    canvas.style.width = "".concat(width, "px");
+    canvas.style.height = "".concat(height, "px");
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+}
+var animationFrameId;
+// Handle scroll and resize events with requestAnimationFrame for performance
+function onScrollOrResize() {
+    if (animationFrameId)
+        cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(render);
+}
+container.addEventListener('scroll', onScrollOrResize);
+window.addEventListener('resize', onScrollOrResize);
+window.addEventListener('DOMContentLoaded', render);
+// Function to convert column index to Excel-style column name
+function getExcelColumnName(col) {
+    var name = '';
+    while (col >= 0) {
+        name = String.fromCharCode((col % 26) + 65) + name;
+        col = Math.floor(col / 26) - 1;
+    }
+    return name;
+}
+// Render column and row bars
+function renderColumnBar(scrollLeft) {
+    var columnBar = document.getElementById("columnBar");
+    columnBar.innerHTML = '';
+    var startCol = Math.floor(scrollLeft / cellWidth);
+    var endCol = Math.min(totalCols - 1, Math.ceil((scrollLeft + container.clientWidth) / cellWidth));
+    for (var col = startCol; col <= endCol; col++) {
+        var div = document.createElement('div');
+        var resizer = document.createElement("div");
+        resizer.className = "resizer-col";
+        div.textContent = getExcelColumnName(col);
+        div.style.position = 'absolute';
+        div.style.left = "".concat(col * cellWidth - scrollLeft, "px");
+        div.style.width = "".concat(cellWidth, "px");
+        div.style.height = '19px';
+        div.style.lineHeight = '19px';
+        div.style.textAlign = 'center';
+        div.style.borderRight = '1px solid #ccc';
+        div.appendChild(resizer);
+        columnBar.appendChild(div);
+    }
+}
+function renderRowBar(scrollTop) {
+    var rowBar = document.getElementById("rowBar");
+    rowBar.innerHTML = '';
+    var startRow = Math.floor(scrollTop / cellHeight);
+    var endRow = Math.min(totalRows - 1, Math.ceil((scrollTop + container.clientHeight) / cellHeight));
+    for (var row = startRow; row <= endRow; row++) {
+        var div = document.createElement('div');
+        div.textContent = "".concat(row);
+        div.style.position = 'absolute';
+        div.style.top = "".concat(row * cellHeight - scrollTop, "px");
+        div.style.width = '63px';
+        div.style.height = "".concat(cellHeight, "px");
+        div.style.lineHeight = "".concat(cellHeight, "px");
+        div.style.textAlign = 'center';
+        div.style.borderBottom = '1px solid #ccc';
+        rowBar.appendChild(div);
+    }
 }
 function render() {
-    if (ctx) {
-        var scrollTop = container.scrollTop;
-        var scrollLeft = container.scrollLeft;
-        syncCanvasPosition();
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        var visibleRows = Math.ceil(canvas.height / cellHeight);
-        var visibleCols = Math.ceil(canvas.width / cellWidth);
-        var bufferRows = Math.ceil(visibleRows / 5);
-        var bufferCols = Math.ceil(visibleCols / 5);
-        var startRow = Math.floor(scrollTop / cellHeight);
-        var startCol = Math.floor(scrollLeft / cellWidth);
-        var endRow = startRow + visibleRows + bufferRows;
-        var endCol = startCol + visibleCols + bufferCols;
-        ctx.font = "12px sans-serif";
-        for (var row = startRow; row <= endRow; row++) {
-            for (var col = startCol; col <= endCol; col++) {
-                if (row >= totalRows || col >= totalCols)
-                    continue;
-                //logic to render main canvas
-                var x = (col * cellWidth) - scrollLeft;
-                var y = (row * cellHeight) - scrollTop;
-                ctx.fillStyle = "#fff";
-                ctx.fillRect(x, y, cellWidth, cellHeight);
-                ctx.strokeStyle = "#ccc";
-                ctx.lineWidth = 1;
-                ctx.strokeRect(x, y, cellWidth, cellHeight);
-                ctx.fillStyle = '#000';
-                ctx.fillText("R".concat(row, " C").concat(col), x + 10, y + 15);
-            }
-        }
-        for (var row = startRow; row <= endRow; row++) {
-            var x = 0;
-            var y = (row * cellHeight) - scrollTop;
-            //logic to render Row Bar Canvas
-            if (rowBarCtx) {
-                rowBarCtx.fillStyle = "#fff";
-                rowBarCtx === null || rowBarCtx === void 0 ? void 0 : rowBarCtx.fillRect(x, y, cellWidth, cellHeight);
-                rowBarCtx.strokeStyle = "#ccc";
-                rowBarCtx.lineWidth = 1;
-                rowBarCtx.strokeRect(x, y, cellWidth, cellHeight);
-                rowBarCtx.fillStyle = "#000";
-                rowBarCtx.fillText('A', x + 10, y + 15);
-            }
-        }
-        for (var col = startCol; col <= endCol; col++) {
-            //logic to render Row Bar Canvas
-            var y = 0;
-            var x = (col * cellWidth) - scrollLeft;
-            if (columnBarCtx) {
-                columnBarCtx.fillStyle = "#fff";
-                columnBarCtx === null || columnBarCtx === void 0 ? void 0 : columnBarCtx.fillRect(x, y, cellWidth, cellHeight);
-                columnBarCtx.strokeStyle = "#ccc";
-                columnBarCtx.lineWidth = 1;
-                columnBarCtx.strokeRect(x, y, cellWidth, cellHeight);
-                columnBarCtx.fillStyle = "#000";
-                columnBarCtx.fillText('A', x + 10, y + 15);
-            }
-        }
-    }
-}
-function drawCell(row, col) {
-    if (!ctx)
-        return;
-    var scrollTop = container.scrollTop;
-    var scrollLeft = container.scrollLeft;
-    var x = (col * cellWidth) - scrollLeft;
-    var y = (row * cellHeight) - scrollTop;
-    if (x + cellWidth < 0 || x > canvas.width || y + cellHeight < 0 || y > canvas.height) {
-        // Skip drawing if outside viewport
-        return;
-    }
-    var cellData = allCells[row][col];
-    // Clear old cell area
-    ctx.clearRect(x, y, cellWidth, cellHeight);
-    // Background
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(x, y, cellWidth, cellHeight);
-    // Border
-    ctx.strokeStyle = "#ccc";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x, y, cellWidth, cellHeight);
-    // Text
-    ctx.fillStyle = "#000";
-    ctx.font = "12px sans-serif";
-    var text = cellData.value || "R".concat(row, " C").concat(col);
-    ctx.fillText(text, x + 10, y + 15);
-}
-canvas.addEventListener("click", function (e) {
-    var x = e.clientX - canvas.getBoundingClientRect().left;
-    var y = e.clientY - canvas.getBoundingClientRect().top;
-    var col = Math.floor((x + container.scrollLeft) / cellWidth);
-    var row = Math.floor((y + container.scrollTop) / cellHeight);
-    if (row < 0 || row >= totalRows ||
-        col < 0 || col >= totalCols)
-        return;
-    var editingCell = allCells[row][col];
-    editingCell.focused = true;
-    editingCell.editing = true;
-    var cellInput = document.createElement('input');
-    cellInput.style.height = "19px";
-    cellInput.style.width = cellWidth + "px";
-    cellInput.style.border = "2px solid #107c41";
-    cellInput.style.position = "absolute";
-    cellInput.style.boxSizing = "border-box";
-    cellInput.style.left = col * cellWidth - container.scrollLeft + canvas.offsetLeft + "px";
-    cellInput.style.top = row * cellHeight - container.scrollTop + canvas.offsetTop + "px";
-    cellInput.value = editingCell.value;
-    cellInput.focus();
-    cellInput.select();
-    cellInput.addEventListener("blur", function () {
-        editingCell.value = cellInput.value;
-        editingCell.editing = false;
-        editingCell.focused = false;
-        container.removeChild(cellInput);
-        drawCell(row, col);
-    });
-    container.appendChild(cellInput);
-});
-function syncCanvasSize() {
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
-}
-window.addEventListener('resize', function () {
     syncCanvasSize();
-    render();
-});
-window.addEventListener('load', generateCells);
+    var scrollLeft = container.scrollLeft;
+    var scrollTop = container.scrollTop;
+    renderColumnBar(scrollLeft);
+    renderRowBar(scrollTop);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var startCol = Math.floor(scrollLeft / cellWidth);
+    var endCol = Math.min(totalCols - 1, Math.ceil((scrollLeft + canvas.width) / cellWidth));
+    var startRow = Math.floor(scrollTop / cellHeight);
+    var endRow = Math.min(totalRows - 1, Math.ceil((scrollTop + canvas.height) / cellHeight));
+    ctx.font = "12px sans-serif";
+    for (var row = startRow; row <= endRow; row++) {
+        for (var col = startCol; col <= endCol; col++) {
+            var x = (col * cellWidth) - scrollLeft;
+            var y = (row * cellHeight) - scrollTop;
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(x, y, cellWidth, cellHeight);
+            ctx.strokeStyle = "#ccc";
+            ctx.strokeRect(x, y, cellWidth, cellHeight);
+        }
+    }
+}
+var columnWidths = [];
 container.addEventListener('scroll', render);
-syncCanvasSize();
-render();
+window.addEventListener('resize', render);
+window.addEventListener('DOMContentLoaded', render);

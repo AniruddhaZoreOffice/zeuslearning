@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="styles/index.css">
+  <meta charset="UTF-8">
+  <title>Virtual Grid</title>
+  <link rel="stylesheet" href="styles/index.css">
 </head>
 <body>
-    <div class="title">
-        My Excel Sheet
+
+<div class="grid-wrapper">
+  <div class="corner">#</div>
+  <div class="column-bar" id="columnBar"></div>
+  <div class="row-bar" id="rowBar"></div>
+
+  <div class="scroll-container">
+    <div class="container" id="container">
+      <div class="grid-content"></div>
     </div>
-    <div class="container">
-        <div class ="mainsheet" ></div>
-       <canvas id="rowBarCanvas"></canvas>
-       <div class="sub-container">
-        <canvas id="columnBarCanvas"></canvas>
-        <canvas id="canvas"></canvas>
-       </div> 
-    </div>
-<script src="scripts/script.js"></script>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+
+  <script src="scripts/script.js"></script>
 </body>
 </html>

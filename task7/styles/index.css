@@ -1,57 +1,114 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
   height: 100%;
+  overflow: hidden;
 }
 
 .title {
-  height: 170px;
+  height: 50px;
   text-align: center;
-  background-color: rgb(243, 243, 243);
+  background: #f3f3f3;
+  line-height: 50px;
+  font-weight: bold;
+}
+
+.grid-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: white;
+}
+
+.corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 63px;
+  height: 19px;
+  background: #f3f3f3;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+  line-height: 19px;
+  font-weight: bold;
+  z-index: 3;
+}
+
+.column-bar {
+  position: absolute;
+  top: 0;
+  left: 63px;
+  right: 0;
+  height: 19px;
+  background: #f3f3f3;
+  border-bottom: 1px solid #ccc;
+  overflow: hidden;
+  z-index: 3;
+}
+
+.row-bar {
+  position: absolute;
+  top: 19px;
+  left: 0;
+  bottom: 0;
+  width: 63px;
+  background: #f3f3f3;
+  border-right: 1px solid #ccc;
+  overflow: hidden;
+  z-index: 3;
 }
 
 .container {
-  height: 80vh;
-  width: 100vw;
-  overflow: auto;
-  position: relative;
-  border: 1px solid #ccc;
-  overflow: scroll;
-}
-.container .mainsheet {
-  height: 200000px;
-  width: 2000px;
-}
-
-.sub-container {
-  display: flex;
-}
-
-#rowBarCanvas {
-  top: 30px;
-  left: 0;
-  height: calc(80vh - 30px);
-  width: 43px;
-}
-
-#columnBarCanvas {
-  top: 0;
-  left: 43px;
-  height: 30px;
-  width: calc(100vw - 43px);
-}
-
-#rowBarCanvas,
-#columnBarCanvas {
   position: absolute;
-  z-index: 10;
+  top: 19px;
+  left: 63px;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  z-index: 1;
+}
+
+.grid-content {
+  width: calc(63px * 500);
+  height: calc(19px * 100000);
 }
 
 #canvas {
-  width: 100vw;
-  height: 80vh;
   position: absolute;
-  margin-top: 30px;
-  margin-left: 43px;
+  top: 19px;
+  left: 63px;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scroll-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: 1;
+}
+
+.resizer-col {
+  width: 5px;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  color: black;
+  right: -3px;
+}
+
+.resizer-col:hover {
+  background-color: #fff;
+  border: 2px solid greenyellow;
+  transform: scaleX(1);
+  cursor: e-resize;
 }/*# sourceMappingURL=index.css.map */

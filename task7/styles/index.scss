@@ -1,57 +1,119 @@
+$cell-width: 63px;
+$cell-height: 19px;
+
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
   height: 100%;
+  overflow: hidden;
 }
 
 .title {
-    height: 170px;
-    text-align: center;
-    background-color: rgb(243,243,243);
+  height: 50px;
+  text-align: center;
+  background: #f3f3f3;
+  line-height: 50px;
+  font-weight: bold;
 }
 
-.container{
-    height: 80vh; 
-    width: 100vw;
-    overflow: auto;
-    position: relative; 
-    border: 1px solid #ccc;
-    overflow: scroll;
-    .mainsheet{
-        height: 200000px;
-        width: 2000px;
-    }
+.grid-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: white;
 }
 
-.sub-container{
-    display:flex;
+.corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: $cell-width;
+  height: $cell-height;
+  background: #f3f3f3;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+  line-height: $cell-height;
+  font-weight: bold;
+  z-index: 3;
 }
 
-#rowBarCanvas{
- top: 30px; 
- left: 0;
- height: calc(80vh - 30px);
- width: 43px ;
+.column-bar {
+  position: absolute;
+  top: 0;
+  left: $cell-width;
+  right: 0;
+  height: $cell-height;
+  background: #f3f3f3;
+  border-bottom: 1px solid #ccc;
+  overflow: hidden;
+  z-index: 3;
 }
 
-#columnBarCanvas{
- top: 0; 
- left: 43px;
- height: 30px;
- width: calc(100vw - 43px);
+.row-bar {
+  position: absolute;
+  top: $cell-height;
+  left: 0;
+  bottom: 0;
+  width: $cell-width;
+  background: #f3f3f3;
+  border-right: 1px solid #ccc;
+  overflow: hidden;
+  z-index: 3;
 }
 
-#rowBarCanvas,
-#columnBarCanvas {
-    position: absolute;
-    z-index: 10;
+.container {
+  position: absolute;
+  top: $cell-height;
+  left: $cell-width;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  border-top: 1px solid #ccc;
+  border-left: 1px solid #ccc;
+  z-index: 1;
+}
+
+.grid-content {
+  width: calc(#{$cell-width} * 500);
+  height: calc(#{$cell-height} * 100000);
 }
 
 #canvas {
-    width: 100vw;
-    height: 80vh;
-    position: absolute; 
-    margin-top: 30px; 
-    margin-left: 43px;
+  position: absolute;
+  top: $cell-height;
+  left: $cell-width;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.scroll-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: 1;
+}
+
+.resizer-col{
+  width: 5px;
+  position: absolute;
+  top: 0; 
+  height: 100%;
+  color: black;
+  right: -3px;
+
+}
+
+.resizer-col:hover {
+  background-color: #fff;
+  border: 2px solid greenyellow;
+
+  transform: scaleX(1);
+  cursor: e-resize;
 }

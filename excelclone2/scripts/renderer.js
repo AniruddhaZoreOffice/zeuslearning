@@ -94,7 +94,7 @@ export class Renderer {
     }
 
     // Draw grid
-    this.ctx.strokeStyle = "#ccc";
+    this.ctx.strokeStyle = "black";
     this.ctx.lineWidth = 1;
 
     for (let row = startRow; row < endRow; row++) {
@@ -118,7 +118,7 @@ export class Renderer {
     this.rowBarctx.textAlign = "center";
     this.rowBarctx.textBaseline = "middle";
     this.rowBarctx.fillStyle = "black";
-    this.rowBarctx.strokeStyle = "#ccc";
+    this.rowBarctx.strokeStyle = "black";
     this.rowBarctx.lineWidth = 1;
 
     for (let row = startRow; row < endRow; row++) {
@@ -135,7 +135,7 @@ export class Renderer {
     this.columnBarctx.textAlign = "center";
     this.columnBarctx.textBaseline = "middle";
     this.columnBarctx.fillStyle = "black";
-    this.columnBarctx.strokeStyle = "#ccc";
+    this.columnBarctx.strokeStyle = "black";
     this.columnBarctx.lineWidth = 1;
 
     for (let col = startCol; col < endCol; col++) {
@@ -157,4 +157,6 @@ export class Renderer {
     }
     return label;
   }
+
+  
 }

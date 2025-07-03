@@ -1,0 +1,47 @@
+body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+      }
+
+.grid-container {
+        position: relative;
+        overflow: hidden;
+      }
+
+#gridCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border: 1px solid #ccc;
+      }
+
+.scrollbar-container {
+  position: absolute;
+}
+
+.scrollbar-h {
+  bottom: 0;
+  left: 0;
+  right: 20px;
+  height: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.scrollbar-v {
+  top: 0;
+  right: 0;
+  bottom: 20px;
+  width: 20px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.scrollbar-content-h {
+  height: 1px;
+}
+
+.scrollbar-content-v {
+  width: 1px;
+}

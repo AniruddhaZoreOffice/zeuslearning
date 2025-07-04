@@ -1,4 +1,5 @@
 import Grid from './grid.js';
+import ResizeHandler from './resizeHandler.js';
 
 class App {
     constructor() {
@@ -7,7 +8,10 @@ class App {
         const cellWidth = 64;
         const cellHeight = 20;
         this.grid = new Grid("100vw","93vh",rows, cols, cellWidth, cellHeight);
+        this.resizeHandler = new ResizeHandler(this.grid)
         
+        
+
         this.setupEventListeners();
         this.grid.resizeCanvas();
     }

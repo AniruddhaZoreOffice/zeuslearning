@@ -7,6 +7,7 @@ body {
 .grid-container {
         position: relative;
         overflow: hidden;
+        
       }
 
 #gridCanvas {

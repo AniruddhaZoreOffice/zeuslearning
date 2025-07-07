@@ -1,4 +1,8 @@
 export default class SelectionHandler {
+    /**
+     * Intializes select handlers
+     * @param {Grid} grid Grid
+     */
     constructor(grid) {
         this.grid = grid;
         this.isSelecting = false;
@@ -11,7 +15,12 @@ export default class SelectionHandler {
         this.lastMousePos = { x: 0, y: 0 };
         this.boundScrollLoop = this.scrollLoop.bind(this);
     }
-
+    
+    /**
+     * Initializes Selection on Mouse action
+     * @param {Event} event Mouse Down Event 
+     * @returns Null
+     */
     handleMouseDown(event) {
         if (this.grid.resizeHandler.resizeTarget) return;
 
@@ -35,7 +44,14 @@ export default class SelectionHandler {
 
         this.grid.requestRedraw();
     }
-
+    
+    /**
+     * Handles Header click
+     * @param {Number} mousePos Mouse position
+     * @param {Number} row Row Number
+     * @param {Number} col Column Number
+     * @param {Boolean} isExtend Extend Selection Yes || No
+     */
     handleHeaderClick(mousePos, row, col, isExtend) {
         this.grid.selectionArea = null;
         this.grid.activeCell = null;
@@ -62,7 +78,13 @@ export default class SelectionHandler {
         this.updateHeaderSelection(this.selectionType === 'col' ? col : row);
         this.grid.addSelectionWindowListeners();
     }
-
+    
+    /**
+     * Handles cell selection
+     * @param {Number} row Row Number
+     * @param {Number} col Column Number
+     * @param {Boolean} isShift Shift selection columns and rows
+     */
     handleCellClick(row, col, isShift) {
         this.grid.selectedColumns.clear();
         this.grid.selectedRows.clear();
@@ -85,7 +107,12 @@ export default class SelectionHandler {
             this.grid.addSelectionWindowListeners();
         }
     }
-
+    
+    /**
+     * Selection on Mouse drag
+     * @param {Event} event Mouse Move Event 
+     * @returns Null
+     */
     handleMouseMove(event) {
         if (!this.isSelecting) return;
 
@@ -95,7 +122,10 @@ export default class SelectionHandler {
         this.updateSelectionBasedOnMouse();
         this.checkForAutoScroll();
     }
-
+    
+    /**
+     * Ends Selection
+     */
     handleMouseUp() {
         if (this.isSelecting) {
             this.stopAutoScroll();
@@ -106,7 +136,11 @@ export default class SelectionHandler {
             this.grid.removeSelectionWindowListeners();
         }
     }
-
+    
+    /**
+     * Updates selected Rows and Columns
+     * @param {Number} endIndex Last selected header
+     */
     updateHeaderSelection(endIndex) {
         const start = this.selectionType === 'col' ? this.selectionStartCell.col : this.selectionStartCell.row;
         const rangeStart = Math.min(start, endIndex);
@@ -122,7 +156,10 @@ export default class SelectionHandler {
         for (const item of this.selectionBeforeDrag) targetSet.add(item);
         for (const item of currentDragRange) targetSet.add(item);
     }
-
+    
+    /**
+     * Redraws on selection
+     */
     updateSelectionBasedOnMouse() {
         if (this.selectionType === 'cell') {
             const row = this.grid.rowAtY(this.lastMousePos.y + this.grid.scrollY);
@@ -142,7 +179,10 @@ export default class SelectionHandler {
             }
         }
     }
-
+    
+    /**
+     * Checks if Auto scroll is needed
+     */
     checkForAutoScroll() {
         const zoneSize = 50;
         const canvas = this.grid.canvas;
@@ -171,19 +211,31 @@ export default class SelectionHandler {
         }
     }
     
+    /**
+     * Starts Auto Scroll
+     * @returns Null
+     */
     startAutoScroll() {
         if (this.isAutoScrolling) return;
         this.isAutoScrolling = true;
         this.scrollLoopId = requestAnimationFrame(this.boundScrollLoop);
     }
-
+    
+    /**
+     * Stops Auto Scroll
+     * @returns Null
+     */
     stopAutoScroll() {
         if (!this.isAutoScrolling) return;
         this.isAutoScrolling = false;
         cancelAnimationFrame(this.scrollLoopId);
         this.scrollLoopId = null;
     }
-
+    
+    /**
+     * Continues Auto Scrolling
+     * @returns Null
+     */
     scrollLoop() {
         if (!this.isAutoScrolling) return;
 

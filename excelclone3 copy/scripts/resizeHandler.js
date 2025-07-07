@@ -1,4 +1,10 @@
+import Grid from "./grid.js";
+
 export default class ResizeHandler {
+    /**
+     * Intializes Resize Handlers
+     * @param {Grid} grid Grid
+     */
     constructor(grid) {
         this.grid = grid;
         this.canvas = grid.canvas;
@@ -14,17 +20,27 @@ export default class ResizeHandler {
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
         this.boundHandleMouseLeave = this.handleMouseLeave.bind(this);
     }
-
+    
+    /**
+     * Adds Mouse Event listeners
+     */
     addWindowListeners() {
         window.addEventListener('mousemove', this.boundHandleMouseMove);
         window.addEventListener('mouseup', this.boundHandleMouseUp);
     }
-
+    
+    /**
+     * Removes Mouse Event listeners
+     */
     removeWindowListeners() {
         window.removeEventListener('mousemove', this.boundHandleMouseMove);
         window.removeEventListener('mouseup', this.boundHandleMouseUp);
     }
-
+    
+    /**
+     * Initializes Resizing on Mouse action
+     * @param {Event} event Mouse Down Event
+     */
     handleMouseDown(event) {
         if (this.resizeTarget) {
             this.isResizing = true;
@@ -39,7 +55,12 @@ export default class ResizeHandler {
             this.addWindowListeners();
         }
     }
-
+    
+    /**
+     * Resizes Column and Rows on Mouse drag
+     * @param {Event} event Mouse Move event 
+     * @returns Null
+     */
     handleMouseMove(event) {
         if (this.isResizing) {
             let newSize;
@@ -78,8 +99,11 @@ export default class ResizeHandler {
             this.resizeTarget = null;
             this.grid.setCursor('default');
         }
-    }
-
+    } 
+    
+    /**
+     * Ends Resizing
+     */
     handleMouseUp() {
         if (this.isResizing) {
             this.isResizing = false;
@@ -87,14 +111,22 @@ export default class ResizeHandler {
             this.grid.updateScrollbarContentSize();
         }
     }
-
+    
+    /**
+     * Sets Mouse cursor as default
+     */
     handleMouseLeave() {
         if (!this.isResizing) {
             this.resizeTarget = null;
             this.grid.setCursor('default');
         }
     }
-
+    
+    /**
+     * Returns selected column for resizing
+     * @param {Number} mousePos Mouse Position
+     * @returns Column Number
+     */
     getColResizeTarget(mousePos) {
         if (mousePos.y > this.grid.headerHeight) return null;
         let currentX = this.grid.headerWidth;
@@ -107,7 +139,12 @@ export default class ResizeHandler {
         }
         return null;
     }
-
+    
+    /**
+     * Returns selected row for resizing
+     * @param {Number} mousePos Mouse Position
+     * @returns Row Number
+     */
     getRowResizeTarget(mousePos) {
         if (mousePos.x > this.grid.headerWidth) return null;
         let currentY = this.grid.headerHeight;

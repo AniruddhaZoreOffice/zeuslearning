@@ -2,6 +2,9 @@ import Grid from './grid.js';
 import ResizeHandler from './resizeHandler.js';
 
 class App {
+    /**
+     * Intializes all Excel functionalities
+     */
     constructor() {
         const rows = 100000;
         const cols = 500;
@@ -10,12 +13,13 @@ class App {
         this.grid = new Grid("100vw","93vh",rows, cols, cellWidth, cellHeight);
         this.resizeHandler = new ResizeHandler(this.grid)
         
-        
-
         this.setupEventListeners();
         this.grid.resizeCanvas();
     }
-
+    
+    /**
+     * Binds all event listeners
+     */
     setupEventListeners() {
         const hScrollbar = this.grid.hScrollbar
         const vScrollbar = this.grid.vScrollbar
@@ -28,13 +32,21 @@ class App {
         });
         canvas.addEventListener("click",this.handleCanvasClick.bind(this))
     }
-    
+     
+    /**
+     * Requests redraw on scrolling
+     */
     handleScroll() {
         this.grid.scrollX = this.grid.hScrollbar.scrollLeft;
         this.grid.scrollY = this.grid.vScrollbar.scrollTop;
         this.grid.requestRedraw();
     }
+    
 
+    /**
+     * Upadtes scollbar position on mouse scroll or shift + scroll for horizontal scroll
+     * @param {Event} e Scroll event 
+     */
     handleWheel(e) {
         e.preventDefault();
         const hScrollbar = this.grid.hScrollbar
@@ -48,7 +60,11 @@ class App {
             vScrollbar.scrollTop += Math.sign(e.deltaY) * rowscrollAmount;
         }
     }
-
+    
+    /**
+     * Handles click on canvas
+     * @param {Event} e Click Event
+     */
     handleCanvasClick(e) {
         const grid = this.grid;
         const rect = grid.canvas.getBoundingClientRect();

@@ -1,4 +1,7 @@
+// resizeHandler.js 
 import Grid from "./grid.js";
+import ColumnResizeHandler from "./resizeHandlers/columnResizeHandler.js";
+import RowResizeHandler from "./resizeHandlers/rowResizeHandler.js";
 
 export default class ResizeHandler {
     /**
@@ -9,11 +12,13 @@ export default class ResizeHandler {
         this.grid = grid;
         this.canvas = grid.canvas;
 
+        this.colHandler = new ColumnResizeHandler(grid);
+        this.rowHandler = new RowResizeHandler(grid);
+
         this.isResizing = false;
         this.resizeTarget = null;
         this.resizeStartPos = { x: 0, y: 0 };
         this.originalSize = 0;
-        this.resizeHandleSize = 4;
         
         this.boundHandleMouseMove = this.handleMouseMove.bind(this);
         this.boundHandleMouseDown = this.handleMouseDown.bind(this);
@@ -57,23 +62,44 @@ export default class ResizeHandler {
     }
     
     /**
-     * Resizes Column and Rows on Mouse drag
+     * Determines cursor styles for non-resize areas.
+     * @param {Number} x X-coordinate
+     * @param {Number} y Y-coordinate
+     * @returns An object describing the hovered area type.
+     */
+    getHoverTarget(x, y) {
+        const grid = this.grid;
+        
+        const scrolledHeaderWidth = grid.headerWidth - grid.scrollX;
+        const scrolledHeaderHeight = grid.headerHeight - grid.scrollY;
+
+        const isOverColHeader = y < scrolledHeaderHeight && x > scrolledHeaderWidth;
+        if (isOverColHeader) {
+            return { type: 'col-header' };
+        }
+
+        const isOverRowHeader = x < scrolledHeaderWidth && y > scrolledHeaderHeight;
+        if (isOverRowHeader) {
+            return { type: 'row-header' };
+        }
+
+        if (x < scrolledHeaderWidth && y < scrolledHeaderHeight) {
+            return { type: 'corner' };
+        }
+
+        return { type: 'cell' };
+    }
+
+    /**
+     * Resizes Column and Rows on Mouse drag and controls cursor styles 
      * @param {Event} event Mouse Move event 
-     * @returns Null
      */
     handleMouseMove(event) {
         if (this.isResizing) {
-            let newSize;
             if (this.resizeTarget.type === 'col') {
-                const deltaX = event.clientX - this.resizeStartPos.x;
-                newSize = this.originalSize + deltaX;
-                newSize = Math.max(20, newSize);
-                this.grid.setColumnWidth(this.resizeTarget.index, newSize);
+                this.colHandler.resize(this.resizeTarget, this.resizeStartPos, this.originalSize, event);
             } else {
-                const deltaY = event.clientY - this.resizeStartPos.y;
-                newSize = this.originalSize + deltaY;
-                newSize = Math.max(20, newSize);
-                this.grid.setRowHeight(this.resizeTarget.index, newSize);
+                this.rowHandler.resize(this.resizeTarget, this.resizeStartPos, this.originalSize, event);
             }
         } else {
             const rect = this.canvas.getBoundingClientRect();
@@ -82,14 +108,14 @@ export default class ResizeHandler {
                 y: event.clientY - rect.top
             };
 
-            const colTarget = this.getColResizeTarget(mousePos);
+            const colTarget = this.colHandler.getResizeTarget(mousePos);
             if (colTarget) {
                 this.resizeTarget = colTarget;
                 this.grid.setCursor('col-resize');
                 return;
             }
 
-            const rowTarget = this.getRowResizeTarget(mousePos);
+            const rowTarget = this.rowHandler.getResizeTarget(mousePos);
             if (rowTarget) {
                 this.resizeTarget = rowTarget;
                 this.grid.setCursor('row-resize');
@@ -97,7 +123,23 @@ export default class ResizeHandler {
             }
 
             this.resizeTarget = null;
-            this.grid.setCursor('default');
+            
+            const target = this.getHoverTarget(event.offsetX, event.offsetY);
+            let cursor = 'default'; 
+
+            switch (target.type) {
+                case 'col-header':
+                case 'row-header':
+                    cursor = 'pointer';
+                    break;
+                case 'cell':
+                    cursor = 'cell';
+                    break;
+                case 'corner':
+                    cursor = 'default';
+                    break;
+            }
+            this.grid.setCursor(cursor);
         }
     } 
     
@@ -120,41 +162,5 @@ export default class ResizeHandler {
             this.resizeTarget = null;
             this.grid.setCursor('default');
         }
-    }
-    
-    /**
-     * Returns selected column for resizing
-     * @param {Number} mousePos Mouse Position
-     * @returns Column Number
-     */
-    getColResizeTarget(mousePos) {
-        if (mousePos.y > this.grid.headerHeight) return null;
-        let currentX = this.grid.headerWidth;
-        for (let c = 1; c < this.grid.cols; c++) {
-            currentX += this.grid.colWidths[c];
-            const edgeX = currentX - this.grid.scrollX;
-            if (Math.abs(mousePos.x - edgeX) < this.resizeHandleSize) {
-                return { type: 'col', index: c };
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * Returns selected row for resizing
-     * @param {Number} mousePos Mouse Position
-     * @returns Row Number
-     */
-    getRowResizeTarget(mousePos) {
-        if (mousePos.x > this.grid.headerWidth) return null;
-        let currentY = this.grid.headerHeight;
-        for (let r = 1; r < this.grid.rows; r++) {
-            currentY += this.grid.rowHeights[r];
-            const edgeY = currentY - this.grid.scrollY;
-            if (Math.abs(mousePos.y - edgeY) < this.resizeHandleSize) {
-                return { type: 'row', index: r };
-            }
-        }
-        return null;
     }
 }

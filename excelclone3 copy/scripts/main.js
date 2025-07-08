@@ -30,6 +30,7 @@ class App {
         canvas.addEventListener("wheel", this.handleWheel.bind(this), {
             passive: false,
         });
+        
         canvas.addEventListener("click",this.handleCanvasClick.bind(this))
     }
      
@@ -37,6 +38,9 @@ class App {
      * Requests redraw on scrolling
      */
     handleScroll() {
+        if (this.grid.CellEditor.isActive()) {
+            this.grid.CellEditor.stopEditing();
+        }
         this.grid.scrollX = this.grid.hScrollbar.scrollLeft;
         this.grid.scrollY = this.grid.vScrollbar.scrollTop;
         this.grid.requestRedraw();

@@ -1,182 +1,153 @@
+
+import RangeSelector from './selectionHandlers/rangeSelector.js';
+import ColumnSelector from './selectionHandlers/columnSelector.js';
+import RowSelector from './selectionHandlers/rowSelector.js';
+
 export default class SelectionHandler {
     /**
      * Intializes select handlers
-     * @param {Grid} grid Grid
+     * @param {import('./grid').default} grid Grid
      */
     constructor(grid) {
         this.grid = grid;
+
+        this.rangeSelector = new RangeSelector(grid);
+        this.columnSelector = new ColumnSelector(grid);
+        this.rowSelector = new RowSelector(grid);
+
         this.isSelecting = false;
-        this.selectionType = null;
-        this.selectionStartCell = null;
-        this.selectionBeforeDrag = new Set();
+        this.activeSelector = null;
+
         this.isAutoScrolling = false;
         this.autoScrollDirection = { x: 0, y: 0 };
         this.scrollLoopId = null;
         this.lastMousePos = { x: 0, y: 0 };
         this.boundScrollLoop = this.scrollLoop.bind(this);
     }
-    
+
     /**
-     * Initializes Selection on Mouse action
+     * Clears all types of selections.
+     */
+    clearAllSelections() {
+        console.log("starting clear")
+        this.grid.selectedColumns.clear();
+        this.grid.selectedRows.clear();
+        this.grid.selectionArea = null;
+        this.grid.activeCell = null;
+    }
+    
+    isClickOnSelection(row, col) {
+        // Check for full column selection
+        if (this.grid.selectedColumns.has(col) && this.grid.selectedRows.size === 0) {
+            return true;
+        }
+
+        // Check for full row selection
+        if (this.grid.selectedRows.has(row) && this.grid.selectedColumns.size === 0) {
+            return true;
+        }
+
+        // Check for range selection
+        if (this.grid.selectionArea) {
+            const { start, end } = this.grid.selectionArea;
+            const minRow = Math.min(start.row, end.row);
+            const maxRow = Math.max(start.row, end.row);
+            const minCol = Math.min(start.col, end.col);
+            const maxCol = Math.max(start.col, end.col);
+            if (row >= minRow && row <= maxRow && col >= minCol && col <= maxCol) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Initializes Selection on Mouse action by delegating to the correct handler.
      * @param {Event} event Mouse Down Event 
-     * @returns Null
      */
     handleMouseDown(event) {
-        if (this.grid.resizeHandler.resizeTarget) return;
+        if (this.grid.resizeHandler.isResizing || this.grid.resizeHandler.resizeTarget) return;
 
         const rect = this.grid.canvas.getBoundingClientRect();
         this.lastMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-        const isShift = event.shiftKey;
-        const isExtend = event.ctrlKey || event.metaKey;
 
         const clickedCol = this.grid.colAtX(this.lastMousePos.x + this.grid.scrollX);
         const clickedRow = this.grid.rowAtY(this.lastMousePos.y + this.grid.scrollY);
         
         if (!clickedRow || !clickedCol) return;
+        
+        const isColHeaderClick = this.lastMousePos.y < this.grid.headerHeight && this.lastMousePos.x > this.grid.headerWidth;
+        const isRowHeaderClick = this.lastMousePos.x < this.grid.headerWidth && this.lastMousePos.y > this.grid.headerHeight;
 
-        const isHeaderClick = this.lastMousePos.y < this.grid.headerHeight || this.lastMousePos.x < this.grid.headerWidth;
+        let shouldStartDragging = false;
+        const isExtend = event.ctrlKey || event.metaKey;
 
-        if (isHeaderClick) {
-            this.handleHeaderClick(this.lastMousePos, clickedRow, clickedCol, isExtend);
+        if (!isExtend && !event.shiftKey ) {
+             if (this.isClickOnSelection(clickedRow, clickedCol)) {
+             this.grid.activeCell = { row: clickedRow, col: clickedCol };
+             this.grid.requestRedraw();
+             return
+            } else {
+              this.clearAllSelections();    
+            }
+        }
+
+        if (isColHeaderClick) {
+            if (!isExtend) { this.grid.selectedRows.clear(); this.grid.selectionArea = null; }
+            this.activeSelector = this.columnSelector;
+            this.activeSelector.start(event, clickedCol);
+            shouldStartDragging = true;
+        } else if (isRowHeaderClick) {
+            if (!isExtend) { this.grid.selectedColumns.clear(); this.grid.selectionArea = null; }
+            this.activeSelector = this.rowSelector;
+            this.activeSelector.start(event, clickedRow);
+            shouldStartDragging = true;
         } else {
-            this.handleCellClick(clickedRow, clickedCol, isShift);
+             if (!event.shiftKey) {
+                this.grid.selectedColumns.clear();
+                this.grid.selectedRows.clear();
+             }
+            this.activeSelector = this.rangeSelector;
+            shouldStartDragging = this.activeSelector.start(event, clickedRow, clickedCol);
+        }
+
+        if (shouldStartDragging) {
+            this.isSelecting = true;
+            this.grid.addSelectionWindowListeners();
         }
 
         this.grid.requestRedraw();
     }
     
     /**
-     * Handles Header click
-     * @param {Number} mousePos Mouse position
-     * @param {Number} row Row Number
-     * @param {Number} col Column Number
-     * @param {Boolean} isExtend Extend Selection Yes || No
-     */
-    handleHeaderClick(mousePos, row, col, isExtend) {
-        this.grid.selectionArea = null;
-        this.grid.activeCell = null;
-
-        if (mousePos.y < this.grid.headerHeight) {
-            this.selectionType = 'col';
-            this.selectionStartCell = { row, col };
-        } else {
-            this.selectionType = 'row';
-            this.selectionStartCell = { row, col };
-        }
-        
-        this.isSelecting = true;
-        const targetSet = this.selectionType === 'col' ? this.grid.selectedColumns : this.grid.selectedRows;
-
-        if (isExtend) {
-            this.selectionBeforeDrag = new Set(targetSet);
-        } else {
-            this.selectionBeforeDrag.clear();
-            this.grid.selectedColumns.clear();
-            this.grid.selectedRows.clear();
-        }
-        
-        this.updateHeaderSelection(this.selectionType === 'col' ? col : row);
-        this.grid.addSelectionWindowListeners();
-    }
-    
-    /**
-     * Handles cell selection
-     * @param {Number} row Row Number
-     * @param {Number} col Column Number
-     * @param {Boolean} isShift Shift selection columns and rows
-     */
-    handleCellClick(row, col, isShift) {
-        this.grid.selectedColumns.clear();
-        this.grid.selectedRows.clear();
-
-        this.selectionType = 'cell';
-        this.isSelecting = true;
-
-        if (isShift && this.grid.activeCell) {
-            this.grid.selectionArea = {
-                start: this.grid.activeCell,
-                end: { row, col }
-            };
-            this.isSelecting = false;
-        } else {
-            this.grid.activeCell = { row, col };
-            this.grid.selectionArea = {
-                start: { row, col },
-                end: { row, col }
-            };
-            this.grid.addSelectionWindowListeners();
-        }
-    }
-    
-    /**
-     * Selection on Mouse drag
+     * Updates selection on Mouse drag via the active selector.
      * @param {Event} event Mouse Move Event 
-     * @returns Null
      */
     handleMouseMove(event) {
-        if (!this.isSelecting) return;
+        if (!this.isSelecting || !this.activeSelector) return;
 
         const rect = this.grid.canvas.getBoundingClientRect();
         this.lastMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
         
-        this.updateSelectionBasedOnMouse();
+        this.activeSelector.update(this.lastMousePos);
         this.checkForAutoScroll();
     }
     
     /**
-     * Ends Selection
+     * Ends Selection.
      */
     handleMouseUp() {
+        console.log("reached")
         if (this.isSelecting) {
+            if (this.activeSelector) {
+                this.activeSelector.end();
+            }
             this.stopAutoScroll();
             this.isSelecting = false;
-            this.selectionType = null;
-            this.selectionStartCell = null;
-            this.selectionBeforeDrag.clear();
+            this.activeSelector = null;
             this.grid.removeSelectionWindowListeners();
-        }
-    }
-    
-    /**
-     * Updates selected Rows and Columns
-     * @param {Number} endIndex Last selected header
-     */
-    updateHeaderSelection(endIndex) {
-        const start = this.selectionType === 'col' ? this.selectionStartCell.col : this.selectionStartCell.row;
-        const rangeStart = Math.min(start, endIndex);
-        const rangeEnd = Math.max(start, endIndex);
-        const currentDragRange = new Set();
-        for (let i = rangeStart; i <= rangeEnd; i++) {
-            currentDragRange.add(i);
-        }
-
-        const targetSet = this.selectionType === 'col' ? this.grid.selectedColumns : this.grid.selectedRows;
-        targetSet.clear();
-
-        for (const item of this.selectionBeforeDrag) targetSet.add(item);
-        for (const item of currentDragRange) targetSet.add(item);
-    }
-    
-    /**
-     * Redraws on selection
-     */
-    updateSelectionBasedOnMouse() {
-        if (this.selectionType === 'cell') {
-            const row = this.grid.rowAtY(this.lastMousePos.y + this.grid.scrollY);
-            const col = this.grid.colAtX(this.lastMousePos.x + this.grid.scrollX);
-            if (row && col) {
-                this.grid.selectionArea.end = { row, col };
-                this.grid.requestRedraw();
-            }
-        } else {
-            const currentTargetIndex = this.selectionType === 'col'
-                ? this.grid.colAtX(this.lastMousePos.x + this.grid.scrollX)
-                : this.grid.rowAtY(this.lastMousePos.y + this.grid.scrollY);
-
-            if (currentTargetIndex !== null) {
-                this.updateHeaderSelection(currentTargetIndex);
-                this.grid.requestRedraw();
-            }
         }
     }
     
@@ -191,40 +162,26 @@ export default class SelectionHandler {
         const canvasHeight = canvas.height / dpr;
 
         let direction = { x: 0, y: 0 };
-
         if (this.lastMousePos.x < zoneSize) direction.x = -1;
         else if (this.lastMousePos.x > canvasWidth - zoneSize) direction.x = 1;
-
         if (this.lastMousePos.y < zoneSize) direction.y = -1;
         else if (this.lastMousePos.y > canvasHeight - zoneSize) direction.y = 1;
         
         this.autoScrollDirection = direction;
 
         if (direction.x !== 0 || direction.y !== 0) {
-            if (!this.isAutoScrolling) {
-                this.startAutoScroll();
-            }
+            if (!this.isAutoScrolling) this.startAutoScroll();
         } else {
-            if (this.isAutoScrolling) {
-                this.stopAutoScroll();
-            }
+            if (this.isAutoScrolling) this.stopAutoScroll();
         }
     }
     
-    /**
-     * Starts Auto Scroll
-     * @returns Null
-     */
     startAutoScroll() {
         if (this.isAutoScrolling) return;
         this.isAutoScrolling = true;
         this.scrollLoopId = requestAnimationFrame(this.boundScrollLoop);
     }
     
-    /**
-     * Stops Auto Scroll
-     * @returns Null
-     */
     stopAutoScroll() {
         if (!this.isAutoScrolling) return;
         this.isAutoScrolling = false;
@@ -232,12 +189,8 @@ export default class SelectionHandler {
         this.scrollLoopId = null;
     }
     
-    /**
-     * Continues Auto Scrolling
-     * @returns Null
-     */
     scrollLoop() {
-        if (!this.isAutoScrolling) return;
+        if (!this.isAutoScrolling || !this.activeSelector) return;
 
         const scrollAmount = 10;
         let newScrollX = this.grid.scrollX + (this.autoScrollDirection.x * scrollAmount);
@@ -249,7 +202,7 @@ export default class SelectionHandler {
         this.grid.hScrollbar.scrollLeft = this.grid.scrollX;
         this.grid.vScrollbar.scrollTop = this.grid.scrollY;
 
-        this.updateSelectionBasedOnMouse();
+        this.activeSelector.update(this.lastMousePos);
         this.scrollLoopId = requestAnimationFrame(this.boundScrollLoop);
     }
 }

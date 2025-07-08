@@ -1,6 +1,7 @@
 import ResizeHandler from "./resizeHandler.js";
 import SelectionHandler from "./SelectionHandler.js";
 import dataStorage from "./dataStorage.js";
+import CellEditor from "./cellEditor.js";
 
 export default class Grid {
     /**
@@ -50,11 +51,13 @@ export default class Grid {
         this.selectedColumns = new Set();
         this.selectedRows = new Set();
         this.activeCell = null;
+        this.intialCell = null;
         this.selectionArea = null;
         this.viewportStartRow = 0;
         this.viewportEndRow = 0;
         this.viewportStartCol = 0;
         this.viewportEndCol = 0;
+        this.isEditing = false;
 
         this.needsRedraw = false;
         this.ctx = this.canvas.getContext("2d");
@@ -67,6 +70,7 @@ export default class Grid {
 
         this.resizeHandler = new ResizeHandler(this);
         this.selectionHandler = new SelectionHandler(this);
+        this.CellEditor = new CellEditor(this)
 
         this.boundSelectionMouseMove = this.selectionHandler.handleMouseMove.bind(this.selectionHandler);
         this.boundSelectionMouseUp = this.selectionHandler.handleMouseUp.bind(this.selectionHandler);
@@ -78,7 +82,7 @@ export default class Grid {
 
         this.canvas.addEventListener('mousemove', (event) => {
             this.resizeHandler.handleMouseMove(event);
-        });
+        }); 
 
         this.canvas.addEventListener('mouseleave', () => {
             if (!this.resizeHandler.isResizing) {
@@ -86,6 +90,10 @@ export default class Grid {
             }
         });
         
+        this.canvas.addEventListener('dblclick',this.handleDoubleClick.bind(this))
+       
+
+
         this.renderLoop();
     }
     
@@ -337,6 +345,8 @@ export default class Grid {
         ctx.fillStyle = "#f5f5f5";
         ctx.fillRect(0, 0, this.canvas.width, this.headerHeight);
         ctx.fillRect(0, 0, this.headerWidth, this.canvas.height);
+
+       
     
         if (this.selectionArea && this.activeCell) {
             const minRow = Math.min(this.selectionArea.start.row, this.selectionArea.end.row);
@@ -357,21 +367,52 @@ export default class Grid {
                 }
             }
         } else {
-            ctx.fillStyle = selectionFill;
+            
+            const selectedColumns = Array.from(this.selectedColumns);
+           const selectedRows = Array.from(this.selectedRows).filter(
+                r => r >= this.viewportStartRow && r <= this.viewportEndRow
+            );
+            
+            const hasSelection = selectedColumns.length > 0 || selectedRows.length > 0;
+            
+            
+
+            //highlight selected columns
             for (const c of this.selectedColumns) {
                 if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
                     const x = this.getColX(c) - this.scrollX;
+                    ctx.fillStyle = selectionFill;
                     ctx.fillRect(x, this.headerHeight, this.colWidths[c], this.canvas.height);
                 }
             }
+            
+
+            //highlight selected rows
             for (const r of this.selectedRows) {
                 if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
                     const y = this.getRowY(r) - this.scrollY;
+                    ctx.fillStyle = selectionFill;
                     ctx.fillRect(this.headerWidth, y, this.canvas.width, this.rowHeights[r]);
+                    
                 }
             }
-        }
+            
 
+            if (hasSelection) {
+                const col = selectedColumns.length > 0 ? selectedColumns[0] : 0;
+                const row = selectedRows.length > 0 ? selectedRows[0] : 0;
+            
+                this.intialCell = { row, col };
+            
+                // Draw white cell at intersection
+                const x = this.getColX(col) - this.scrollX;
+                const y = this.getRowY(row) - this.scrollY;
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(x, y, this.colWidths[col], this.rowHeights[row]);
+            }
+        }
+        
+        ctx.lineWidth = 1
         ctx.beginPath();
         ctx.strokeStyle = defaultGridLineColor;
         for (let c = this.viewportStartCol; c <= this.viewportEndCol + 1; c++) {
@@ -392,6 +433,10 @@ export default class Grid {
         for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
             for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
                 const value = this.dataStorage.getCellValue(r, c);
+                if (this.isEditing && this.activeCell.row === r && this.activeCell.col === c) {
+                    continue;
+                }
+
                 if (value) {
                     const screenX = this.getColX(c) - this.scrollX;
                     const screenY = this.getRowY(r) - this.scrollY;
@@ -412,37 +457,135 @@ export default class Grid {
             minCol: Math.min(this.selectionArea.start.col, this.selectionArea.end.col),
             maxCol: Math.max(this.selectionArea.start.col, this.selectionArea.end.col),
         } : null;
-    
+        
+        //render header styles on cell or range selection
         if (selectionRange) {
             ctx.fillStyle = headerSelectionFill;
             for (let c = selectionRange.minCol; c <= selectionRange.maxCol; c++) {
                 if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
                     const x = this.getColX(c) - this.scrollX;
                     ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
+                    
+                    const borderX = x + this.colWidths[c] - 0.5; 
+                    
+                    ctx.beginPath(); 
+                    ctx.strokeStyle = defaultGridLineColor;
+                    ctx.lineWidth = 1; 
+                    
+                    ctx.moveTo(borderX, 0); 
+                    ctx.lineTo(borderX, this.headerHeight); 
+                    
+                    ctx.stroke();
                 }
             }
             for (let r = selectionRange.minRow; r <= selectionRange.maxRow; r++) {
                 if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
                     const y = this.getRowY(r) - this.scrollY;
                     ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
+                    const borderY = y + this.rowHeights[r] - 0.5; 
+                
+                    ctx.beginPath(); 
+                    ctx.strokeStyle = defaultGridLineColor;
+                    ctx.lineWidth = 1; 
+                    
+                    ctx.moveTo(0 , borderY); 
+                    ctx.lineTo(this.headerWidth, borderY); 
+                    
+                    ctx.stroke();
                 }
             }
         } else {
-            ctx.fillStyle = excelGreen;
+            
             for (const c of this.selectedColumns) {
                 if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
                     const x = this.getColX(c) - this.scrollX;
+                    ctx.fillStyle = excelGreen;
                     ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
                 }
             }
             for (const r of this.selectedRows) {
                 if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
                     const y = this.getRowY(r) - this.scrollY;
+                    ctx.fillStyle = excelGreen;
                     ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
                 }
             }
+            if(Array.from(this.selectedColumns).length > 0 ){
+                   for (let r = 0; r <= this.viewportEndRow; r++) {
+                   if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
+                       const y = this.getRowY(r) - this.scrollY;
+                       ctx.fillStyle = headerSelectionFill
+                       ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
+
+                       const startY = this.getRowY(this.viewportStartRow) - this.scrollY;
+                       let totalVisibleHeight = 0;
+                       for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
+                           totalVisibleHeight += this.rowHeights[r];
+                               const y = this.getRowY(r) - this.scrollY;
+                               ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
+                               const borderY = y + this.rowHeights[r] - 0.5; 
+                    
+                               ctx.beginPath(); 
+                               ctx.strokeStyle = defaultGridLineColor;
+                               ctx.lineWidth = 1; 
+                               
+                               ctx.moveTo(0 , borderY); 
+                               ctx.lineTo(this.headerWidth, borderY); 
+                               
+                               ctx.stroke();
+                       }
+                       const borderX = this.headerWidth - 0.5; 
+
+                       ctx.beginPath(); 
+                       ctx.strokeStyle = excelGreen;
+                       ctx.lineWidth = 2; 
+                       ctx.moveTo( borderX,startY);
+                       ctx.lineTo( borderX,startY + totalVisibleHeight);
+                       ctx.stroke();
+                   }
+                   
+                   }
+            }
+            if(Array.from(this.selectedRows).length > 0 ){
+                   for (let c = 0; c <= this.viewportEndCol; c++) {
+                   if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
+                       const x = this.getColX(c) - this.scrollX;
+                       ctx.fillStyle = headerSelectionFill
+                       ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
+
+                       const startX = this.getColX(this.viewportStartCol) - this.scrollX;
+                       let totalVisibleWidth = 0;
+                       for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
+                           totalVisibleWidth += this.colWidths[c];
+
+                           const x = this.getColX(c) - this.scrollX;
+                           ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
+                           
+                           const borderX = x + this.colWidths[c] - 0.5; 
+                           
+                           ctx.beginPath(); 
+                           ctx.strokeStyle = defaultGridLineColor;
+                           ctx.lineWidth = 1; 
+                           
+                           ctx.moveTo(borderX, 0); 
+                           ctx.lineTo(borderX, this.headerHeight); 
+                           
+                           ctx.stroke();
+                        }
+                       const borderY = this.headerHeight - 0.5; 
+
+                       ctx.beginPath(); 
+                       ctx.strokeStyle = excelGreen;
+                       ctx.lineWidth = 2; 
+                       ctx.moveTo(startX, borderY);
+                       ctx.lineTo(startX + totalVisibleWidth, borderY);
+                       ctx.stroke();
+                    }
+            }
+            
+            }
         }
-    
+        // to render headers
         ctx.font = "12px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -458,7 +601,8 @@ export default class Grid {
             ctx.fillStyle = isSelected ? "white" : defaultHeaderTextColor;
             ctx.fillText(this.colToExcelLabel(c - 1), screenX + this.colWidths[c] / 2, this.headerHeight / 2);
         }
-    
+        
+        // to render selection area (range selection)
         ctx.strokeStyle = excelGreen;
         if (this.selectionArea) {
             const minRow = Math.min(this.selectionArea.start.row, this.selectionArea.end.row);
@@ -509,7 +653,54 @@ export default class Grid {
             ctx.fillStyle = "#f5f5f5";
             ctx.fillRect(0, 0, this.headerWidth, this.headerHeight);
         }
-        }
+        ctx.save()
+            ctx.strokeStyle = excelGreen;
+            ctx.lineWidth = 2;
+            
+            if(Array.from(this.selectedRows).length > 0){
+                const firstSelectedRow = Array.from(this.selectedRows)[0];
+                const lastSelectedRow = Array.from(this.selectedRows).at(-1);
+                const upperBorderY = this.getRowY(firstSelectedRow)  - this.scrollY;
+                const lowerBorderY = this.getRowY(lastSelectedRow) + this.getRowHeight(lastSelectedRow) - this.scrollY;
+            
+                const startX = this.headerWidth; 
+                const endX = this.canvas.width;  
+                
+                ctx.beginPath();
+                ctx.moveTo(startX,upperBorderY);
+                ctx.lineTo(endX,upperBorderY);
+                ctx.stroke();
+                
+                 
+                ctx.beginPath()
+                ctx.moveTo(startX,lowerBorderY)
+                ctx.lineTo(endX, lowerBorderY)
+                ctx.stroke()
+            }
+
+            if(Array.from(this.selectedColumns).length > 0){
+                const firstSelectedCol = Array.from(this.selectedColumns)[0];
+                const lastSelectedCol = Array.from(this.selectedColumns).at(-1);
+                const leftborderX = this.getColX(firstSelectedCol)  - this.scrollX;
+                const rightBorderX = this.getColX(lastSelectedCol) + this.getColWidth(lastSelectedCol) - this.scrollX;
+            
+                const startY = this.headerHeight; 
+                const endY = this.canvas.height;  
+                 
+                ctx.beginPath();
+                ctx.moveTo(leftborderX, startY);
+                ctx.lineTo(leftborderX, endY);
+                ctx.stroke();
+                
+                 
+                ctx.beginPath()
+                ctx.moveTo(rightBorderX, startY)
+                ctx.lineTo(rightBorderX, endY)
+                ctx.stroke()
+            }
+            ctx.restore()
+        
+    }
     
     /**
      * Returns maximum scrolling along x-axis 
@@ -530,5 +721,22 @@ export default class Grid {
         const canvasHeight = this.canvas.height / this.getDPR();
         return Math.max(0, totalGridHeight - (canvasHeight - this.headerHeight));
     }
+    
+    
+    handleDoubleClick(event){
+        if (this.activeCell && !this.isEditing) {
+            this.startEditing();
+        }
+    }
+
+
+    startEditing(clearContent = false) {
+        if (!this.activeCell || this.CellEditor.isActive()) return;
+        this.CellEditor.startEditing(this.activeCell);
+        if (clearContent) {
+            this.CellEditor.input.value = '';
+        }
+    }
+
 
 }

@@ -14,8 +14,7 @@ export default class ColumnSelector {
      * @param {number} col The starting column.
      */
     start(event, col) {
-        this.grid.selectionArea = null;
-        this.grid.activeCell = null;
+        
         this.startCol = col;
 
         const isExtend = event.ctrlKey || event.metaKey;

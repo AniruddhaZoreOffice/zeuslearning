@@ -8,6 +8,7 @@ export default class RangeSelector {
 
     /**
      * Starts a cell/range selection.
+     * Assumes the activeCell has already been set by the SelectionHandler.
      * @param {MouseEvent} event The mouse down event.
      * @param {number} row The starting row.
      * @param {number} col The starting column.
@@ -15,21 +16,20 @@ export default class RangeSelector {
      */
     start(event, row, col) {
         if (event.shiftKey && this.grid.activeCell) {
-            // If shift is pressed, just extend the selection from the active cell.
-            // This is a one-off action, not a drag.
+            // For shift-click, extend the selection from the existing active cell.
             this.grid.selectionArea = {
                 start: this.grid.activeCell,
                 end: { row, col }
             };
-            return false; // Crucially, indicates that dragging should NOT start.
+            this.end(); // Normalize immediately
+            return false; // This is a one-off action, not a drag.
         } else {
-            // Otherwise, start a new selection from the clicked cell.
-            this.grid.activeCell = { row, col };
+            // For a normal click/drag, the activeCell IS the start of our selection.
             this.grid.selectionArea = {
-                start: { row, col },
-                end: { row, col }
+                start: this.grid.activeCell,
+                end: this.grid.activeCell
             };
-            return true; // Crucially, indicates that dragging SHOULD start.
+            return true; // Indicates that dragging SHOULD start.
         }
     }
 
@@ -38,18 +38,36 @@ export default class RangeSelector {
      * @param {{x: number, y: number}} mousePos The current mouse position.
      */
     update(mousePos) {
-        const row = this.grid.rowAtY(mousePos.y + this.grid.scrollY);
-        const col = this.grid.colAtX(mousePos.x + this.grid.scrollX);
-        if (row && col && this.grid.selectionArea) {
-            this.grid.selectionArea.end = { row, col };
+        if (!this.grid.selectionArea) return;
+
+        const newRow = this.grid.rowAtY(mousePos.y + this.grid.scrollY);
+        const newCol = this.grid.colAtX(mousePos.x + this.grid.scrollX);
+
+        if (newRow === null || newCol === null) return;
+
+        const currentEnd = this.grid.selectionArea.end;
+
+        if (newRow !== currentEnd.row || newCol !== currentEnd.col) {
+            this.grid.selectionArea.end = { row: newRow, col: newCol };
             this.grid.requestRedraw();
         }
     }
 
     /**
-     * Finalizes the selection. (No specific action needed for range selection).
+     * Finalizes and normalizes the selection.
      */
     end() {
-        
+        if (!this.grid.selectionArea) return;
+        const { start, end } = this.grid.selectionArea;
+
+        const minRow = Math.min(start.row, end.row);
+        const maxRow = Math.max(start.row, end.row);
+        const minCol = Math.min(start.col, end.col);
+        const maxCol = Math.max(start.col, end.col);
+
+        this.grid.selectionArea = {
+            start: { row: minRow, col: minCol },
+            end: { row: maxRow, col: maxCol }
+        };
     }
 }

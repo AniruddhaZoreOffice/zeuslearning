@@ -14,8 +14,7 @@ export default class RowSelector {
      * @param {number} row The starting row.
      */
     start(event, row) {
-        this.grid.selectionArea = null;
-        this.grid.activeCell = null;
+        
         this.startRow = row;
 
         const isExtend = event.ctrlKey || event.metaKey;

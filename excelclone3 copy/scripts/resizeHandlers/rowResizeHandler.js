@@ -36,8 +36,13 @@ export default class RowResizeHandler {
      */
     resize(target, resizeStartPos, originalSize, event) {
         const deltaY = event.clientY - resizeStartPos.y;
+        let heightAboveTarget = 0
+        for(let i = 0;i< target.index;i++) {
+            heightAboveTarget += this.grid.rowHeights[i]
+        }
+        const maxResizebleHeight = (this.grid.canvas.height / this.grid.getDPR()) - heightAboveTarget;
         let newSize = originalSize + deltaY;
         newSize = Math.max(20, newSize); // Minimum height
-        this.grid.setRowHeight(target.index, newSize);
+        this.grid.setRowHeight(target.index, Math.min(newSize,maxResizebleHeight));
     }
 }

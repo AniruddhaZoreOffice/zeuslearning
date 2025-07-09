@@ -35,8 +35,13 @@ export default class ColumnResizeHandler {
      */
     resize(target, resizeStartPos, originalSize, event) {
         const deltaX = event.clientX - resizeStartPos.x;
+        let WidthBesideTarget = 0
+        for(let i = 0;i< target.index;i++) {
+            WidthBesideTarget += this.grid.colWidths[i]
+        }
+        const maxResizebleWidth = (this.grid.canvas.width / this.grid.getDPR()) - WidthBesideTarget;
         let newSize = originalSize + deltaX;
         newSize = Math.max(20, newSize); // Minimum width
-        this.grid.setColumnWidth(target.index, newSize);
+        this.grid.setColumnWidth(target.index, Math.min(newSize,maxResizebleWidth));
     }
 }

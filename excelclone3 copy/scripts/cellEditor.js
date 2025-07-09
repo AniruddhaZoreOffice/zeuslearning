@@ -1,4 +1,9 @@
 export default class CellEditor {
+    /**
+     * Initializes the cell editor component. It creates the input element but
+     * does not attach its own event listeners.
+     * @param {import('./grid').default} grid The main grid instance.
+     */
     constructor(grid) {
         this.grid = grid;
         this.input = document.createElement('input');
@@ -8,8 +13,6 @@ export default class CellEditor {
 
         this.editingCell = null;
 
-        this.input.addEventListener('blur', this.handleBlur.bind(this));
-        this.input.addEventListener('keydown', this.handleKeyDown.bind(this));
     }
 
     /**

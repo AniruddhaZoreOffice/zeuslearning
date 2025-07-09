@@ -1,11 +1,11 @@
-
 import RangeSelector from './selectionHandlers/rangeSelector.js';
 import ColumnSelector from './selectionHandlers/columnSelector.js';
 import RowSelector from './selectionHandlers/rowSelector.js';
+import AutoScroller from './autoscroller.js'; 
 
 export default class SelectionHandler {
     /**
-     * Intializes select handlers
+     * Initializes select handlers
      * @param {import('./grid').default} grid Grid
      */
     constructor(grid) {
@@ -15,21 +15,17 @@ export default class SelectionHandler {
         this.columnSelector = new ColumnSelector(grid);
         this.rowSelector = new RowSelector(grid);
 
+        this.autoScroller = new AutoScroller(grid, this.onAutoScroll.bind(this));
+
         this.isSelecting = false;
         this.activeSelector = null;
-
-        this.isAutoScrolling = false;
-        this.autoScrollDirection = { x: 0, y: 0 };
-        this.scrollLoopId = null;
         this.lastMousePos = { x: 0, y: 0 };
-        this.boundScrollLoop = this.scrollLoop.bind(this);
     }
 
     /**
      * Clears all types of selections.
      */
     clearAllSelections() {
-        console.log("starting clear")
         this.grid.selectedColumns.clear();
         this.grid.selectedRows.clear();
         this.grid.selectionArea = null;
@@ -37,17 +33,9 @@ export default class SelectionHandler {
     }
     
     isClickOnSelection(row, col) {
-        // Check for full column selection
-        if (this.grid.selectedColumns.has(col) && this.grid.selectedRows.size === 0) {
-            return true;
-        }
-
-        // Check for full row selection
-        if (this.grid.selectedRows.has(row) && this.grid.selectedColumns.size === 0) {
-            return true;
-        }
-
-        // Check for range selection
+        if (this.grid.selectedColumns.has(col) && this.grid.selectedRows.size === 0) return true;
+        if (this.grid.selectedRows.has(row) && this.grid.selectedColumns.size === 0) return true;
+        
         if (this.grid.selectionArea) {
             const { start, end } = this.grid.selectionArea;
             const minRow = Math.min(start.row, end.row);
@@ -58,10 +46,8 @@ export default class SelectionHandler {
                 return true;
             }
         }
-
         return false;
     }
-
 
     /**
      * Initializes Selection on Mouse action by delegating to the correct handler.
@@ -76,24 +62,26 @@ export default class SelectionHandler {
         const clickedCol = this.grid.colAtX(this.lastMousePos.x + this.grid.scrollX);
         const clickedRow = this.grid.rowAtY(this.lastMousePos.y + this.grid.scrollY);
         
-        if (!clickedRow || !clickedCol) return;
+        if (clickedRow === null || clickedCol === null) return;
         
         const isColHeaderClick = this.lastMousePos.y < this.grid.headerHeight && this.lastMousePos.x > this.grid.headerWidth;
         const isRowHeaderClick = this.lastMousePos.x < this.grid.headerWidth && this.lastMousePos.y > this.grid.headerHeight;
-
-        let shouldStartDragging = false;
         const isExtend = event.ctrlKey || event.metaKey;
 
-        if (!isExtend && !event.shiftKey ) {
-             if (this.isClickOnSelection(clickedRow, clickedCol)) {
-             this.grid.activeCell = { row: clickedRow, col: clickedCol };
-             this.grid.requestRedraw();
-             return
-            } else {
-              this.clearAllSelections();    
-            }
+        if (!isExtend && !event.shiftKey) {
+            this.clearAllSelections();
         }
 
+        if (isColHeaderClick) {
+            this.grid.activeCell = { row: 1, col: clickedCol }; 
+        } else if (isRowHeaderClick) {
+            this.grid.activeCell = { row: clickedRow, col: 1 }; 
+        } else {
+            this.grid.activeCell = { row: clickedRow, col: clickedCol };
+        }
+
+        let shouldStartDragging = false;
+        
         if (isColHeaderClick) {
             if (!isExtend) { this.grid.selectedRows.clear(); this.grid.selectionArea = null; }
             this.activeSelector = this.columnSelector;
@@ -115,14 +103,13 @@ export default class SelectionHandler {
 
         if (shouldStartDragging) {
             this.isSelecting = true;
-            this.grid.addSelectionWindowListeners();
         }
 
         this.grid.requestRedraw();
     }
     
     /**
-     * Updates selection on Mouse drag via the active selector.
+     * Updates selection and checks for auto-scrolling during a mouse drag.
      * @param {Event} event Mouse Move Event 
      */
     handleMouseMove(event) {
@@ -132,77 +119,34 @@ export default class SelectionHandler {
         this.lastMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
         
         this.activeSelector.update(this.lastMousePos);
-        this.checkForAutoScroll();
+        
+        this.autoScroller.check(this.lastMousePos);
     }
     
     /**
-     * Ends Selection.
+     * Ends the selection process.
      */
     handleMouseUp() {
-        console.log("reached")
         if (this.isSelecting) {
             if (this.activeSelector) {
                 this.activeSelector.end();
             }
-            this.stopAutoScroll();
+           
+            this.autoScroller.stop();
+
             this.isSelecting = false;
             this.activeSelector = null;
-            this.grid.removeSelectionWindowListeners();
+            this.grid.requestRedraw();
         }
     }
-    
+
     /**
-     * Checks if Auto scroll is needed
+     * This callback is passed to the AutoScroller. It's called on each
+     * frame of an auto-scroll, ensuring the selection range keeps expanding.
      */
-    checkForAutoScroll() {
-        const zoneSize = 50;
-        const canvas = this.grid.canvas;
-        const dpr = this.grid.getDPR();
-        const canvasWidth = canvas.width / dpr;
-        const canvasHeight = canvas.height / dpr;
-
-        let direction = { x: 0, y: 0 };
-        if (this.lastMousePos.x < zoneSize) direction.x = -1;
-        else if (this.lastMousePos.x > canvasWidth - zoneSize) direction.x = 1;
-        if (this.lastMousePos.y < zoneSize) direction.y = -1;
-        else if (this.lastMousePos.y > canvasHeight - zoneSize) direction.y = 1;
-        
-        this.autoScrollDirection = direction;
-
-        if (direction.x !== 0 || direction.y !== 0) {
-            if (!this.isAutoScrolling) this.startAutoScroll();
-        } else {
-            if (this.isAutoScrolling) this.stopAutoScroll();
+    onAutoScroll() {
+        if (this.activeSelector) {
+            this.activeSelector.update(this.lastMousePos);
         }
-    }
-    
-    startAutoScroll() {
-        if (this.isAutoScrolling) return;
-        this.isAutoScrolling = true;
-        this.scrollLoopId = requestAnimationFrame(this.boundScrollLoop);
-    }
-    
-    stopAutoScroll() {
-        if (!this.isAutoScrolling) return;
-        this.isAutoScrolling = false;
-        cancelAnimationFrame(this.scrollLoopId);
-        this.scrollLoopId = null;
-    }
-    
-    scrollLoop() {
-        if (!this.isAutoScrolling || !this.activeSelector) return;
-
-        const scrollAmount = 10;
-        let newScrollX = this.grid.scrollX + (this.autoScrollDirection.x * scrollAmount);
-        let newScrollY = this.grid.scrollY + (this.autoScrollDirection.y * scrollAmount);
-
-        this.grid.scrollX = Math.max(0, Math.min(newScrollX, this.grid.getMaxScrollX()));
-        this.grid.scrollY = Math.max(0, Math.min(newScrollY, this.grid.getMaxScrollY()));
-
-        this.grid.hScrollbar.scrollLeft = this.grid.scrollX;
-        this.grid.vScrollbar.scrollTop = this.grid.scrollY;
-
-        this.activeSelector.update(this.lastMousePos);
-        this.scrollLoopId = requestAnimationFrame(this.boundScrollLoop);
     }
 }

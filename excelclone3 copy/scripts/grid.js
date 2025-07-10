@@ -1,5 +1,3 @@
-import ResizeHandler from "./resizeHandler.js";
-import SelectionHandler from "./SelectionHandler.js";
 import dataStorage from "./dataStorage.js";
 import CellEditor from "./cellEditor.js";
 
@@ -68,8 +66,6 @@ export default class Grid {
         this.colWidths = Array(cols).fill(defaultCellWidth);
         this.rowHeights = Array(rows).fill(defaultCellHeight);
 
-        this.resizeHandler = new ResizeHandler(this);
-        this.selectionHandler = new SelectionHandler(this);
         this.CellEditor = new CellEditor(this)
 
         this.renderLoop();
@@ -301,6 +297,8 @@ export default class Grid {
         const headerSelectionFill = '#CCFFCC';
         const defaultHeaderTextColor = '#555';
         const defaultGridLineColor = '#DCDCDC';
+        const canvasWidth = this.canvas.width / this.getDPR();
+        const canvasHeight = this.canvas.height / this.getDPR();
     
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         ctx.fillStyle = "#fff";
@@ -357,7 +355,7 @@ export default class Grid {
             
             //highlight selected columns
             for (const c of this.selectedColumns) {
-                if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
+                
                     if (c === this.activeCell.col){
                     const x = this.getColX(c) - this.scrollX;
                     ctx.fillStyle = selectionFill;
@@ -369,13 +367,13 @@ export default class Grid {
                     ctx.fillStyle = selectionFill;
                     ctx.fillRect(x, this.headerHeight, this.colWidths[c], this.canvas.height);
                     }
-                }
+                
             }
             
 
             //highlight selected rows
             for (const r of this.selectedRows) {
-                if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
+               
                     if (r === this.activeCell.row ){
                     const y = this.getRowY(r) - this.scrollY;
                     ctx.fillStyle = selectionFill;
@@ -386,7 +384,7 @@ export default class Grid {
                     ctx.fillStyle = selectionFill;
                     ctx.fillRect(this.headerWidth, y, this.canvas.width, this.rowHeights[r]);
                     }
-                }
+                
             }
             
            
@@ -431,6 +429,15 @@ export default class Grid {
             }
         }
         
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.strokeStyle = "#C6C6C6";
+        ctx.moveTo(this.headerWidth + 0.5, 0);
+        ctx.lineTo(this.headerWidth + 0.5, this.canvas.height);
+        ctx.moveTo(0, this.headerHeight + 0.5);
+        ctx.lineTo(this.canvas.width, this.headerHeight + 0.5);
+        ctx.stroke();
+
         const selectionRange = this.selectionArea ? {
             minRow: Math.min(this.selectionArea.start.row, this.selectionArea.end.row),
             maxRow: Math.max(this.selectionArea.start.row, this.selectionArea.end.row),
@@ -441,172 +448,174 @@ export default class Grid {
         //render header styles on cell or range selection
         if (selectionRange) {
             ctx.fillStyle = headerSelectionFill;
+            // Draw column header selection
             for (let c = selectionRange.minCol; c <= selectionRange.maxCol; c++) {
-                
-                    const idealStartX = this.getColX(c) - this.scrollX;
-                    const idealWidth = this.colWidths[c];
-            
-                    const clippedStartX = Math.max(this.headerWidth, idealStartX);
-                    const clippedWidth = idealWidth - (clippedStartX - idealStartX);
-            
-                    if (clippedWidth > 0) {
-                        ctx.fillRect(clippedStartX, 0, clippedWidth, this.headerHeight);
-                        ctx.save()
-                       
-                        ctx.beginPath()
-                        ctx.strokeStyle = defaultGridLineColor
-                        ctx.lineWidth = 2
-                        ctx.moveTo(clippedStartX + clippedWidth,0)
-                        ctx.lineTo(clippedWidth + clippedStartX,this.headerHeight)
-                        ctx.stroke() 
-                        
-                        ctx.beginPath()
-                        ctx.strokeStyle = excelGreen
-                        ctx.lineWidth = 2
-                        ctx.moveTo(clippedStartX,this.headerHeight)
-                        ctx.lineTo(clippedWidth + clippedStartX,this.headerHeight,)
-                        ctx.stroke()
- 
-                        ctx.stroke()
-                        ctx.restore()
-                    }
-                
+                const idealStartX = this.getColX(c) - this.scrollX;
+                const idealWidth = this.colWidths[c];
+        
+                const renderStartX = Math.max(this.headerWidth, idealStartX);
+                const renderEndX = Math.min(canvasWidth, idealStartX + idealWidth);
+                const renderWidth = renderEndX - renderStartX;
+        
+                if (renderWidth > 0) {
+                    ctx.fillRect(renderStartX, 0, renderWidth, this.headerHeight);
+                    ctx.save();
+                   
+                    ctx.beginPath();
+                    ctx.strokeStyle = defaultGridLineColor;
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(renderStartX + renderWidth, 0);
+                    ctx.lineTo(renderStartX + renderWidth, this.headerHeight);
+                    ctx.stroke(); 
+                    
+                    ctx.beginPath();
+                    ctx.strokeStyle = excelGreen;
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(renderStartX, this.headerHeight);
+                    ctx.lineTo(renderStartX + renderWidth, this.headerHeight);
+                    ctx.stroke();
+
+                    ctx.restore();
+                }
             }
+
+            // Draw row header selection
             for (let r = selectionRange.minRow; r <= selectionRange.maxRow; r++) {
-                
-                   const idealStartY = this.getRowY(r) - this.scrollY;
-                   const idealHeight = this.rowHeights[r];
-           
-                   const clippedStartY = Math.max(this.headerHeight, idealStartY);
-                   const clippedHeight = idealHeight - (clippedStartY - idealStartY);
-           
-                   if (clippedHeight > 0) {
-                       ctx.fillRect(0, clippedStartY, this.headerWidth, clippedHeight);
-                       ctx.save()
-                       
-                       ctx.beginPath()
-                       ctx.strokeStyle = defaultGridLineColor
-                       ctx.lineWidth = 1
-                       ctx.moveTo(0,clippedStartY + clippedHeight)
-                       ctx.lineTo(this.headerWidth,clippedHeight + clippedStartY)
-                       ctx.stroke() 
+               const idealStartY = this.getRowY(r) - this.scrollY;
+               const idealHeight = this.rowHeights[r];
+       
+               const renderStartY = Math.max(this.headerHeight, idealStartY);
+               const renderEndY = Math.min(canvasHeight, idealStartY + idealHeight);
+               const renderHeight = renderEndY - renderStartY;
+       
+               if (renderHeight > 0) {
+                   ctx.fillRect(0, renderStartY, this.headerWidth, renderHeight);
+                   ctx.save();
+                   
+                   ctx.beginPath();
+                   ctx.strokeStyle = defaultGridLineColor;
+                   ctx.lineWidth = 1;
+                   ctx.moveTo(0, renderStartY + renderHeight);
+                   ctx.lineTo(this.headerWidth, renderStartY + renderHeight);
+                   ctx.stroke(); 
 
-                       ctx.beginPath()
-                       ctx.strokeStyle = excelGreen
-                       ctx.lineWidth = 2
-                       ctx.moveTo(this.headerWidth,clippedStartY)
-                       ctx.lineTo(this.headerWidth,clippedHeight + clippedStartY)
-                       ctx.stroke()
+                   ctx.beginPath();
+                   ctx.strokeStyle = excelGreen;
+                   ctx.lineWidth = 2;
+                   ctx.moveTo(this.headerWidth, renderStartY);
+                   ctx.lineTo(this.headerWidth, renderStartY + renderHeight);
+                   ctx.stroke();
 
-                       ctx.stroke()
-                       ctx.restore()
-                    }
-                
+                   ctx.restore();
+                }
             }
         } else {
-            
+            // Draw selected full column headers
             for (const c of this.selectedColumns) {
                 if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
-                    const x = this.getColX(c) - this.scrollX;
-                    ctx.fillStyle = excelGreen;
-                    ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
+                    const idealX = this.getColX(c) - this.scrollX;
+                    const idealWidth = this.colWidths[c];
+                    
+                    const renderStartX = Math.max(this.headerWidth, idealX);
+                    const renderEndX = Math.min(canvasWidth, idealX + idealWidth);
+                    const renderWidth = renderEndX - renderStartX;
+            
+                    if (renderWidth > 0) {
+                        ctx.fillStyle = excelGreen;
+                        ctx.fillRect(renderStartX, 0, renderWidth, this.headerHeight);
+                    }
                 }
             }
+            // Draw selected full row headers
             for (const r of this.selectedRows) {
                 if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
-                    const y = this.getRowY(r) - this.scrollY;
-                    ctx.fillStyle = excelGreen;
-                    ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
+                    const idealY = this.getRowY(r) - this.scrollY;
+                    const idealHeight = this.rowHeights[r];
+            
+                    const renderStartY = Math.max(this.headerHeight, idealY);
+                    const renderEndY = Math.min(canvasHeight, idealY + idealHeight);
+                    const renderHeight = renderEndY - renderStartY;
+            
+                    if (renderHeight > 0) {
+                        ctx.fillStyle = excelGreen;
+                        ctx.fillRect(0, renderStartY, this.headerWidth, renderHeight);
+                    }
                 }
             }
-            if(Array.from(this.selectedColumns).length > 0 ){
-                   for (let r = 0; r <= this.viewportEndRow; r++) {
-                   if (r >= this.viewportStartRow && r <= this.viewportEndRow) {
-                       const y = this.getRowY(r) - this.scrollY;
-                       ctx.fillStyle = headerSelectionFill
-                       ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
 
-                       const startY = this.getRowY(this.viewportStartRow) - this.scrollY;
-                       let totalVisibleHeight = 0;
-                       for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
-                           totalVisibleHeight += this.rowHeights[r];
-                               const y = this.getRowY(r) - this.scrollY;
-                               ctx.fillRect(0, y, this.headerWidth, this.rowHeights[r]);
-                               const borderY = y + this.rowHeights[r] - 0.5; 
-                    
-                               ctx.beginPath(); 
-                               ctx.strokeStyle = defaultGridLineColor;
-                               ctx.lineWidth = 1; 
-                               
-                               ctx.moveTo(0 , borderY); 
-                               ctx.lineTo(this.headerWidth, borderY); 
-                               
-                               ctx.stroke();
-                       }
-                       const borderX = this.headerWidth - 0.5; 
+            // If full columns are selected, highlight all visible row headers
+            if(this.selectedColumns.size > 0 ){
+                ctx.fillStyle = headerSelectionFill;
+                for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
+                    const idealY = this.getRowY(r) - this.scrollY;
+                    const idealHeight = this.rowHeights[r];
+                    const renderStartY = Math.max(this.headerHeight, idealY);
+                    const renderEndY = Math.min(canvasHeight, idealY + idealHeight);
+                    const renderHeight = renderEndY - renderStartY;
 
-                       ctx.beginPath(); 
-                       ctx.strokeStyle = excelGreen;
-                       ctx.lineWidth = 2; 
-                       ctx.moveTo( borderX,startY);
-                       ctx.lineTo( borderX,startY + totalVisibleHeight);
-                       ctx.stroke();
-                   }
-                   
-                   }
-            }
-            if(Array.from(this.selectedRows).length > 0 ){
-                   for (let c = 0; c <= this.viewportEndCol; c++) {
-                   if (c >= this.viewportStartCol && c <= this.viewportEndCol) {
-                       const x = this.getColX(c) - this.scrollX;
-                       ctx.fillStyle = headerSelectionFill
-                       ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
-
-                       const startX = this.getColX(this.viewportStartCol) - this.scrollX;
-                       let totalVisibleWidth = 0;
-                       for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
-                           totalVisibleWidth += this.colWidths[c];
-
-                           const x = this.getColX(c) - this.scrollX;
-                           ctx.fillRect(x, 0, this.colWidths[c], this.headerHeight);
-                           
-                           const borderX = x + this.colWidths[c] - 0.5; 
-                           
-                           ctx.beginPath(); 
-                           ctx.strokeStyle = defaultGridLineColor;
-                           ctx.lineWidth = 1; 
-                           
-                           ctx.moveTo(borderX, 0); 
-                           ctx.lineTo(borderX, this.headerHeight); 
-                           
-                           ctx.stroke();
-                        }
-                       const borderY = this.headerHeight - 0.5; 
-
-                       ctx.beginPath(); 
-                       ctx.strokeStyle = excelGreen;
-                       ctx.lineWidth = 2; 
-                       ctx.moveTo(startX, borderY);
-                       ctx.lineTo(startX + totalVisibleWidth, borderY);
-                       ctx.stroke();
+                    if (renderHeight > 0) {
+                        ctx.fillRect(0, renderStartY, this.headerWidth, renderHeight);
+                        const borderY = renderStartY + renderHeight - 0.5;
+                        ctx.beginPath();
+                        ctx.strokeStyle = defaultGridLineColor;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(0, borderY);
+                        ctx.lineTo(this.headerWidth, borderY);
+                        ctx.stroke();
                     }
+                }
+                const borderX = this.headerWidth - 1; 
+                ctx.beginPath();
+                ctx.strokeStyle = excelGreen;
+                ctx.lineWidth = 2;
+                ctx.moveTo(borderX, this.headerHeight);
+                ctx.lineTo(borderX, canvasHeight);
+                ctx.stroke();
             }
-            
+
+            // If full rows are selected, highlight all visible column headers
+            if(this.selectedRows.size > 0 ){
+                ctx.fillStyle = headerSelectionFill;
+                for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
+                    const idealX = this.getColX(c) - this.scrollX;
+                    const idealWidth = this.colWidths[c];
+                    const renderStartX = Math.max(this.headerWidth, idealX);
+                    const renderEndX = Math.min(canvasWidth, idealX + idealWidth);
+                    const renderWidth = renderEndX - renderStartX;
+
+                    if (renderWidth > 0) {
+                        ctx.fillRect(renderStartX, 0, renderWidth, this.headerHeight);
+                        const borderX = renderStartX + renderWidth - 0.5;
+                        ctx.beginPath();
+                        ctx.strokeStyle = defaultGridLineColor;
+                        ctx.lineWidth = 1;
+                        ctx.moveTo(borderX, 0);
+                        ctx.lineTo(borderX, this.headerHeight);
+                        ctx.stroke();
+                    }
+                }
+                const borderY = this.headerHeight - 1;
+                ctx.beginPath();
+                ctx.strokeStyle = excelGreen;
+                ctx.lineWidth = 2;
+                ctx.moveTo(this.headerWidth, borderY);
+                ctx.lineTo(canvasWidth, borderY);
+                ctx.stroke();
             }
         }
 
-        // to render headers
+        // to render headers text
         ctx.font = "12px Arial";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
-            const isSelected = this.selectedRows.has(r);
+            const isSelected = this.selectedRows.has(r) && this.selectedColumns.size === 0;
             const screenY = this.getRowY(r) - this.scrollY;
             ctx.fillStyle = isSelected ? "white" : defaultHeaderTextColor;
             ctx.fillText(r.toString(), this.headerWidth / 2, screenY + this.rowHeights[r] / 2);
         }
         for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
-            const isSelected = this.selectedColumns.has(c);
+            const isSelected = this.selectedColumns.has(c) && this.selectedRows.size === 0;
             const screenX = this.getColX(c) - this.scrollX;
             ctx.fillStyle = isSelected ? "white" : defaultHeaderTextColor;
             ctx.fillText(this.colToExcelLabel(c - 1), screenX + this.colWidths[c] / 2, this.headerHeight / 2);
@@ -629,38 +638,36 @@ export default class Grid {
             for (let i = minRow; i <= maxRow; i++) idealHeight += this.rowHeights[i];
         
             const clippedStartX = Math.max(this.headerWidth, idealStartX);
+            console.log(this.headerWidth,clippedStartX)
             const clippedStartY = Math.max(this.headerHeight, idealStartY);
             
             const clippedWidth = idealWidth - (clippedStartX - idealStartX);
             const clippedHeight = idealHeight - (clippedStartY - idealStartY);
             
             if (clippedWidth > 0 && clippedHeight > 0) {
-            ctx.lineWidth = 2;
-            ctx.strokeRect(clippedStartX, clippedStartY, clippedWidth, clippedHeight);
-    
-            
-            ctx.lineWidth = 1 / this.getDPR();
-            ctx.beginPath();
+                ctx.lineWidth = 2;
+                ctx.strokeRect(clippedStartX, clippedStartY, clippedWidth, clippedHeight);
                 
-            const headerBottomY = this.headerHeight - this.scrollY;
-            
-            const lineEndX = clippedStartX + clippedWidth;
-            
-            if (headerBottomY > 0 && headerBottomY < this.headerHeight) {
-                   ctx.moveTo(clippedStartX, headerBottomY);
-                   ctx.lineTo(lineEndX, headerBottomY);
-               }
-       
-               
-               const headerRightX = this.headerWidth - this.scrollX;
-               const lineEndY = clippedStartY + clippedHeight;
-               
-               if (headerRightX > 0 && headerRightX < this.headerWidth) {
-                    ctx.moveTo(headerRightX, clippedStartY);
-                    ctx.lineTo(headerRightX, lineEndY);
-               }
-              
-               ctx.stroke();
+                ctx.lineWidth = 1 / this.getDPR();
+                ctx.beginPath();
+                    
+                const headerBottomY = this.headerHeight - this.scrollY;
+                const lineEndX = clippedStartX + clippedWidth;
+                
+                if (headerBottomY > 0 && headerBottomY < this.headerHeight) {
+                    ctx.moveTo(clippedStartX, headerBottomY);
+                    ctx.lineTo(lineEndX, headerBottomY);
+                }
+           
+                const headerRightX = this.headerWidth - this.scrollX;
+                const lineEndY = clippedStartY + clippedHeight;
+                
+                // if (headerRightX > 0 && headerRightX < this.headerWidth) {
+                //         ctx.moveTo(headerRightX, clippedStartY);
+                //         ctx.lineTo(headerRightX, lineEndY);
+                // }
+                
+                ctx.stroke();
             }
     
         } 
@@ -672,14 +679,7 @@ export default class Grid {
             ctx.rect(x + 1, y + 1, this.colWidths[this.activeCell.col] - 2, this.rowHeights[this.activeCell.row] - 2);
         }
        
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.strokeStyle = "#C6C6C6";
-        ctx.moveTo(this.headerWidth + 0.5, 0);
-        ctx.lineTo(this.headerWidth + 0.5, this.canvas.height);
-        ctx.moveTo(0, this.headerHeight + 0.5);
-        ctx.lineTo(this.canvas.width, this.headerHeight + 0.5);
-        ctx.stroke();
+       
     
         if (this.selectedRows.size > 0 && this.selectedColumns.size > 0) {
             ctx.fillStyle = "#f5f5f5";
@@ -697,16 +697,18 @@ export default class Grid {
             
                 const startX = this.headerWidth; 
                 const endX = this.canvas.width;  
-                
+                console.log(this.headerHeight,upperBorderY)
+
+
                 ctx.beginPath();
-                ctx.moveTo(startX,upperBorderY);
-                ctx.lineTo(endX,upperBorderY);
+                ctx.moveTo(startX,Math.max(this.headerHeight,upperBorderY));
+                ctx.lineTo(endX,Math.max(this.headerHeight,upperBorderY));
                 ctx.stroke();
                 
                  
                 ctx.beginPath()
-                ctx.moveTo(startX,lowerBorderY)
-                ctx.lineTo(endX, lowerBorderY)
+                ctx.moveTo(startX,Math.max(lowerBorderY,this.headerHeight))
+                ctx.lineTo(endX, Math.max(lowerBorderY,this.headerHeight))
                 ctx.stroke()
             }
 
@@ -720,8 +722,8 @@ export default class Grid {
                 const endY = this.canvas.height;  
                  
                 ctx.beginPath();
-                ctx.moveTo(leftborderX, startY);
-                ctx.lineTo(leftborderX, endY);
+                ctx.moveTo(Math.max(leftborderX,this.headerWidth), startY);
+                ctx.lineTo(Math.max(leftborderX,this.headerWidth), endY);
                 ctx.stroke();
                 
                  

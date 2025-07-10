@@ -1,123 +1,174 @@
-/**
- * Initializes all event listeners for the spreadsheet.
- * This is the single entry point for this module.
- * @param {App} app - The main application instance, used to access the grid and its handlers.
- */
-export function initializeEventListeners(app) {
-    const grid = app.grid;
-    const canvas = grid.canvas;
-    const hScrollbar = grid.hScrollbar;
-    const vScrollbar = grid.vScrollbar;
-    const cellEditorInput = grid.CellEditor.input; // Get a reference to the editor's input
+import ColumnResizeHandler from './resizeHandlers/columnResizeHandler.js';
+import RowResizeHandler from './resizeHandlers/rowResizeHandler.js';
+import RangeSelector from './selectionHandlers/rangeSelector.js';
+import ColumnSelector from './selectionHandlers/columnSelector.js';
+import RowSelector from './selectionHandlers/rowSelector.js';
+import AutoScroller from './autoscroller.js';
+import CellEditor from './cellEditor.js';
+import Grid from './grid.js';
 
-    // --- Window Listeners (Always Active) ---
-    window.addEventListener("resize", () => grid.resizeCanvas());
-    window.addEventListener('mousemove', (event) => handleWindowMouseMove(event, grid));
-    window.addEventListener('mouseup', (event) => handleWindowMouseUp(event, grid));
+export default class EventListeners {
+    /**
+     * Initializes all event listeners for the spreadsheet by creating an instance of this class.
+     * @param {import('../app.js').App} app - The main application instance.
+     */
+    constructor(app) {
+        /** @type {Grid} */
+        this.grid = app.grid;
+        /** @type {HTMLCanvasElement} */
+        this.canvas = this.grid.canvas;
+        /** @type {HTMLElement} */
+        this.hScrollbar = this.grid.hScrollbar;
+        /** @type {HTMLElement} */
+        this.vScrollbar = this.grid.vScrollbar;
+        /** @type {HTMLInputElement} */
+        this.cellEditorInput = this.grid.CellEditor.input;
 
-    // --- Scrollbar Listeners ---
-    hScrollbar.addEventListener("scroll", () => handleScroll(grid));
-    vScrollbar.addEventListener("scroll", () => handleScroll(grid));
+        // --- Instantiate Handlers ONCE ---
+        const autoScroller = new AutoScroller(this.grid); // Create ONE shared scroller
 
-    // --- Canvas Listeners ---
-    canvas.addEventListener("wheel", (event) => handleWheel(event, grid), { passive: false });
-    canvas.addEventListener("click", (event) => handleCanvasClick(event, grid));
-    canvas.addEventListener('mousedown', (event) => handleCanvasMouseDown(event, grid));
-    canvas.addEventListener('mouseleave', () => handleCanvasMouseLeave(grid));
-    canvas.addEventListener('dblclick', () => handleCanvasDoubleClick(grid));
+        this.grid.colResizeHandler = new ColumnResizeHandler(this.grid);
+        this.grid.rowResizeHandler = new RowResizeHandler(this.grid);
+        this.grid.rangeSelector = new RangeSelector(this.grid, autoScroller);
+        this.grid.columnSelector = new ColumnSelector(this.grid, autoScroller);
+        this.grid.rowSelector = new RowSelector(this.grid, autoScroller);
 
-    // --- Cell Editor Listeners ---
-    cellEditorInput.addEventListener('blur', () => handleEditorBlur(grid.CellEditor));
-    cellEditorInput.addEventListener('keydown', (event) => handleEditorKeyDown(event, grid.CellEditor));
-}
-
-// --- App-Level & Scroll Handlers ---
-
-function handleScroll(grid) {
-    if (grid.CellEditor.isActive()) grid.CellEditor.stopEditing();
-    grid.scrollX = grid.hScrollbar.scrollLeft;
-    grid.scrollY = grid.vScrollbar.scrollTop;
-    grid.requestRedraw();
-}
-
-function handleWheel(e, grid) {
-    e.preventDefault();
-    if (e.shiftKey) {
-        grid.hScrollbar.scrollLeft += Math.sign(e.deltaY) * 100;
-    } else {
-        grid.vScrollbar.scrollTop += Math.sign(e.deltaY) * 20;
+        // --- Attach all listeners ---
+        this.addListeners();
     }
-}
 
-// --- Canvas-Specific Handlers ---
+    /**
+     * Binds all event listeners to their respective elements.
+     */
+    addListeners() {
+        // --- Window Listeners ---
+        window.addEventListener("resize", this.grid.resizeCanvas.bind(this.grid));
+        
 
-function handleCanvasClick(e, grid) {
-    const rect = grid.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+        // --- Scrollbar Listeners ---
+        this.hScrollbar.addEventListener("scroll", this.handleScroll.bind(this));
+        this.vScrollbar.addEventListener("scroll", this.handleScroll.bind(this));
 
-    const needsRedraw = grid.selectedColumns.size > 0 || grid.selectedRows.size > 0;
-    grid.selectedColumns.clear();
-    grid.selectedRows.clear();
+        // --- Canvas Listeners ---
+        this.canvas.addEventListener("wheel", this.handleWheel.bind(this), { passive: false });
+        this.canvas.addEventListener('mousedown', this.handleCanvasMouseDown.bind(this));
+        this.canvas.addEventListener('mousemove', this.handleCanvasMouseMove.bind(this));
+        this.canvas.addEventListener('mouseleave', this.handleCanvasMouseLeave.bind(this));
+        this.canvas.addEventListener('dblclick', this.handleCanvasDoubleClick.bind(this));
 
-    if (y < grid.headerHeight && x > grid.headerWidth) { // Column header click
-        const clickedColumn = grid.colAtX(x + grid.scrollX);
-        if (clickedColumn !== null) grid.selectedColumns.add(clickedColumn);
-        grid.requestRedraw();
-    } else if (x < grid.headerWidth && y > grid.headerHeight) { // Row header click
-        const clickedRow = grid.rowAtY(y + grid.scrollY);
-        if (clickedRow !== null) grid.selectedRows.add(clickedRow);
-        grid.requestRedraw();
-    } else if (needsRedraw) { // Click on grid body to clear selection
-        grid.requestRedraw();
+        // --- Cell Editor Listeners ---
+        this.cellEditorInput.addEventListener('blur', this.handleEditorBlur.bind(this));
+        this.cellEditorInput.addEventListener('keydown', this.handleEditorKeyDown.bind(this));
     }
-}
 
-function handleCanvasMouseDown(event, grid) {
-    // Delegate the event to the appropriate sub-handlers to check if they should act.
-    grid.resizeHandler.handleMouseDown(event);
-    grid.selectionHandler.handleMouseDown(event);
-}
+    // --- App-Level & Scroll Handlers ---
 
-function handleCanvasMouseLeave(grid) {
-    // Delegate to the resize handler.
-    grid.resizeHandler.handleMouseLeave();
-}
-
-function handleCanvasDoubleClick(grid) {
-    if (grid.activeCell && !grid.isEditing) {
-        grid.startEditing();
+    handleScroll() {
+        if (this.grid.CellEditor.isActive()) this.grid.CellEditor.stopEditing();
+        this.grid.scrollX = this.hScrollbar.scrollLeft;
+        this.grid.scrollY = this.vScrollbar.scrollTop;
+        this.grid.requestRedraw();
     }
-}
 
-// --- Window-Level Handlers (for drags, etc.) ---
+    /** 
+     * @param {WheelEvent} e 
+     */
+    handleWheel(e) {
+        e.preventDefault();
+        if (e.shiftKey) {
+            this.hScrollbar.scrollLeft += Math.sign(e.deltaY) * 100;
+        } else {
+            this.vScrollbar.scrollTop += Math.sign(e.deltaY) * 20;
+        }
+    }
 
-function handleWindowMouseMove(event, grid) {
-    
-    grid.resizeHandler.handleMouseMove(event);
-    grid.selectionHandler.handleMouseMove(event);
-}
+    // --- Canvas-Specific Handlers ---
 
-function handleWindowMouseUp(event, grid) {
-    // Both handlers need to know when the mouse is released, anywhere on the page,
-    // to reset their state.
-    grid.resizeHandler.handleMouseUp(event);
-    grid.selectionHandler.handleMouseUp(event);
-}
+    /** @param {MouseEvent} event */
+    handleCanvasMouseDown(event) {
+        // Delegate the mousedown event to ALL handlers.
+        // They will internally check their hit-zones and decide if they need to act.
+        this.grid.colResizeHandler.handleMouseDown(event);
+        this.grid.rowResizeHandler.handleMouseDown(event);
+        this.grid.rangeSelector.handleMouseDown(event);
+        this.grid.columnSelector.handleMouseDown(event);
+        this.grid.rowSelector.handleMouseDown(event);
+    }
 
-/**
- * Handles the blur event on the cell editor input.
- * @param {import('./cellEditor.js').default} cellEditor The cell editor instance.
- */
-function handleEditorBlur(cellEditor) {
-    cellEditor.handleBlur();
-}
+    /**
+     * Handles hover effects when the mouse moves over the canvas.
+     * @param {MouseEvent} event
+     */
+    handleCanvasMouseMove(event) {
+        const isResizing = this.grid.colResizeHandler.isResizing || this.grid.rowResizeHandler.isResizing;
+        const isSelecting = this.grid.rangeSelector.isSelecting || this.grid.columnSelector.isSelecting || this.grid.rowSelector.isSelecting;
 
-/**
- * Handles keydown events on the cell editor input (e.g., Enter, Escape).
- * @param {KeyboardEvent} event The keyboard event.
- * @param {import('./cellEditor.js').default} cellEditor The cell editor instance.
- */
-function handleEditorKeyDown(event, cellEditor) {
-    cellEditor.handleKeyDown(event);
+        // If an operation is in progress, let its own handler manage the cursor.
+        if (isResizing || isSelecting) return;
+
+        // Check for resize handles first (higher priority). The handler will set the cursor.
+        if (this.grid.colResizeHandler.handleMouseMove(event)) return;
+        if (this.grid.rowResizeHandler.handleMouseMove(event)) return;
+
+        // If not resizing, set the general cursor style based on location.
+        this.setGeneralCursor(event);
+    }
+
+    handleCanvasMouseLeave() {
+        const isResizing = this.grid.colResizeHandler.isResizing || this.grid.rowResizeHandler.isResizing;
+        const isSelecting = this.grid.rangeSelector.isSelecting || this.grid.columnSelector.isSelecting || this.grid.rowSelector.isSelecting;
+
+        // Only reset the cursor if we are NOT in the middle of an operation.
+        if (!isResizing && !isSelecting) {
+            this.grid.setCursor('default');
+        }
+    }
+
+    handleCanvasDoubleClick() {
+        if (this.grid.activeCell && !this.grid.isEditing) {
+            this.grid.startEditing();
+        }
+    }
+
+    // --- Window-Level Handlers ---
+
+    /**
+     * Handles mouse release anywhere on the window.
+     * @param {MouseEvent} event
+     */
+    handleWindowMouseUp(event) {
+        // Notify all handlers that the mouse is up, so the active one can reset its state.
+        this.grid.colResizeHandler.handleMouseUp(event);
+        this.grid.rowResizeHandler.handleMouseUp(event);
+        this.grid.rangeSelector.handleMouseUp(event);
+        this.grid.columnSelector.handleMouseUp(event);
+        this.grid.rowSelector.handleMouseUp(event);
+    }
+
+    // --- Helper & Editor Handlers ---
+
+    /**
+     * Sets the cursor for non-resize, non-active areas on the canvas.
+     * @param {MouseEvent} event
+     */
+    setGeneralCursor(event) {
+        const mousePos = { x: event.offsetX, y: event.offsetY };
+
+        if (this.grid.columnSelector.hitTest(mousePos) || this.grid.rowSelector.hitTest(mousePos)) {
+            this.grid.setCursor('pointer'); // Column or Row header
+        } else if (this.grid.rangeSelector.hitTest(mousePos)) {
+            this.grid.setCursor('cell'); // Main cell area
+        } else {
+            this.grid.setCursor('default'); // Corner area
+        }
+    }
+
+    handleEditorBlur() {
+        this.grid.CellEditor.handleBlur();
+    }
+
+    /** @param {KeyboardEvent} event */
+    handleEditorKeyDown(event) {
+        this.grid.CellEditor.handleKeyDown(event);
+    }
 }

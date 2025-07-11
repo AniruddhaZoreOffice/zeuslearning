@@ -49,7 +49,7 @@ export default class ColumnSelector {
         }
         
         this.grid.activeCell = { row: 0, col: clickedCol };
-        this.updateSelection(clickedCol); // Initial update
+        this.updateSelection(clickedCol); 
 
         window.addEventListener('mousemove', this.boundHandleMouseMove);
         window.addEventListener('mouseup', this.boundHandleMouseUp);

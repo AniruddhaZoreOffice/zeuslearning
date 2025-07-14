@@ -17,7 +17,7 @@ export default class AutoScroller {
         this.scrollDirection = { x: 0, y: 0 };
         this.scrollLoopId = null;
 
-        this.scrollSpeed = 2;
+        this.scrollSpeed = 10;
         this.zoneSize = 20;
 
         this._scrollLoop = this._scrollLoop.bind(this);

@@ -1,8 +1,4 @@
 export default class ColumnSelector {
-    /**
-     * @param {import('../grid').default} grid The grid instance
-     * @param {import('../autoscroller').default} autoScroller A shared AutoScroller instance
-     */
     constructor(grid, autoScroller) {
         this.grid = grid;
         this.autoScroller = autoScroller;
@@ -10,31 +6,28 @@ export default class ColumnSelector {
         this.startCol = null;
         this.selectionBeforeDrag = new Set();
         this.lastMousePos = { x: 0, y: 0 };
+        this.onComplete = null;
+        this.rafId = null;
 
+        this.boundSelectionLoop = this.selectionLoop.bind(this);
         this.boundHandleMouseMove = this.handleMouseMove.bind(this);
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
     }
 
-    /**
-     * 1. Hit-Test Function: Checks if a mouse position is within the column header area.
-     * @param {{x: number, y: number}} mousePos
-     * @returns {boolean}
-     */
     hitTest(mousePos) {
         return mousePos.y < this.grid.headerHeight && mousePos.x > this.grid.headerWidth;
     }
 
-    /**
-     * 2. MouseDown Handler: Starts a column selection.
-     * @param {MouseEvent} event
-     */
-    handleMouseDown(event) {
-        const mousePos = { x: event.offsetX, y: event.offsetY };
-        if (!this.hitTest(mousePos)) return;
+    handleMouseDown(event, onComplete) {
+        this.onComplete = onComplete;
+        this.lastMousePos = { x: event.offsetX, y: event.offsetY };
 
-        const clickedCol = this.grid.colAtX(mousePos.x + this.grid.scrollX);
-        if (clickedCol === null) return;
-        
+        const clickedCol = this.grid.colAtX(this.lastMousePos.x + this.grid.scrollX);
+        if (clickedCol === null) {
+            if (this.onComplete) this.onComplete();
+            return;
+        }
+
         this.isSelecting = true;
         this.startCol = clickedCol;
 
@@ -47,54 +40,62 @@ export default class ColumnSelector {
             this.grid.selectionArea = null;
             this.selectionBeforeDrag.clear();
         }
-        
-        this.grid.activeCell = { row: 0, col: clickedCol };
-        this.updateSelection(clickedCol); 
+
+        this.grid.activeCell = { row: 1, col: clickedCol };
+        this.updateSelection(clickedCol);
 
         window.addEventListener('mousemove', this.boundHandleMouseMove);
         window.addEventListener('mouseup', this.boundHandleMouseUp);
+        this.selectionLoop();
     }
 
-    /**
-     * 3. MouseMove Handler: Updates the column selection during a drag.
-     * @param {MouseEvent} [event]
-     */
     handleMouseMove(event) {
         if (event) {
             const rect = this.grid.canvas.getBoundingClientRect();
             this.lastMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
         }
+    }
+
+    selectionLoop() {
         if (!this.isSelecting) return;
-        
+
         const currentCol = this.grid.colAtX(this.lastMousePos.x + this.grid.scrollX);
         this.updateSelection(currentCol);
         
-        this.autoScroller.check(this.lastMousePos, () => this.handleMouseMove());
+        this.autoScroller.check(this.lastMousePos);
+        
+        this.grid.requestRedraw();
+
+        this.rafId = requestAnimationFrame(this.boundSelectionLoop);
     }
 
-    /**
-     * 4. MouseUp Handler: Finalizes the selection.
-     * @param {MouseEvent} event
-     */
     handleMouseUp(event) {
         if (this.isSelecting) {
             this.isSelecting = false;
+            
+            cancelAnimationFrame(this.rafId);
+            this.rafId = null;
             this.autoScroller.stop();
+
             this.startCol = null;
             this.selectionBeforeDrag.clear();
 
             window.removeEventListener('mousemove', this.boundHandleMouseMove);
             window.removeEventListener('mouseup', this.boundHandleMouseUp);
+
+            if (this.onComplete) {
+                this.onComplete();
+            }
+            this.onComplete = null;
         }
     }
 
-    /** Helper to perform the selection update logic. */
     updateSelection(endCol) {
         if (endCol === null) return;
 
         const rangeStart = Math.min(this.startCol, endCol);
         const rangeEnd = Math.max(this.startCol, endCol);
-        
+
         const currentDragRange = new Set();
         for (let i = rangeStart; i <= rangeEnd; i++) {
             currentDragRange.add(i);
@@ -105,7 +106,5 @@ export default class ColumnSelector {
 
         for (const item of this.selectionBeforeDrag) targetSet.add(item);
         for (const item of currentDragRange) targetSet.add(item);
-        
-        this.grid.requestRedraw();
     }
 }

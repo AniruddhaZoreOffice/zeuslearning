@@ -31,5 +31,4 @@ class App {
     }
 }
 
-// Start the application once the DOM is fully loaded.
 window.addEventListener("DOMContentLoaded", () => new App());

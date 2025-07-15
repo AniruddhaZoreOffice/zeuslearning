@@ -1,4 +1,8 @@
 export default class ColumnResizeHandler {
+    /**
+     * Intializes the Column Resize Handler
+     * @param {import('./grid').default} grid Grid Instance
+     */
     constructor(grid) {
         this.grid = grid;
         this.canvas = grid.canvas;
@@ -15,7 +19,11 @@ export default class ColumnResizeHandler {
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
     }
 
- 
+    /**
+     * A function to test if Column Resize has to be done based on Mouse Position
+     * @param {{x: number, y: number}} mousePos Position of Mouse Pointer 
+     * @returns {({index: number} | null)} An object containing the index of the column to be resized if the mouse is on a divider, otherwise null.
+     */
     hitTest(mousePos) {
         if (mousePos.y > this.grid.headerHeight) return null;
     
@@ -34,7 +42,14 @@ export default class ColumnResizeHandler {
         
         return null;
     }
-
+    
+    /**
+     * Handles the mouse down event to start a column resize operation.
+     * @param {MouseEvent} event The mouse down event.
+     * @param {function(): void} onComplete A callback function to execute when the resize operation is complete.
+     * @param {{index: number}} hitResult An object containing the index of the column to be resized.
+     * @returns {void}
+     */
     handleMouseDown(event, onComplete, hitResult) {
         this.isResizing = true;
         this.onComplete = onComplete;
@@ -49,6 +64,11 @@ export default class ColumnResizeHandler {
         event.preventDefault();
     }
 
+    /**
+     * Handles the mouse move event to update the column width during a resize.
+     * @param {MouseEvent} event The mouse move event.
+     * @returns {void}
+     */
     handleMouseMove(event) {
         if (this.rafId) {
             cancelAnimationFrame(this.rafId);
@@ -58,10 +78,18 @@ export default class ColumnResizeHandler {
         this.rafId = requestAnimationFrame(() => {
         const deltaX = event.clientX - this.resizeStartPos;
         let newWidth = this.originalWidth + deltaX;
-        newWidth = Math.max(20, newWidth);
-        this.grid.setColumnWidth(this.targetColumnIndex, newWidth);})
+        newWidth = Math.max(20, newWidth); // Ensure minimum width
+        this.grid.setColumnWidth(this.targetColumnIndex, newWidth);
+        this.rafId = null; // Reset rafId after execution
+        });
     }
 
+    /**
+     * Handles the mouse up event to finalize the column resize operation.
+     * Cleans up event listeners and updates the grid's scrollbar content size.
+     * @param {MouseEvent} event The mouse up event.
+     * @returns {void}
+     */
     handleMouseUp(event) {
         if (this.rafId) {
             cancelAnimationFrame(this.rafId);

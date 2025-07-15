@@ -1,20 +1,82 @@
 export default class RangeSelector {
+    /**
+     * Initializes the RangeSelector.
+     * @param {Grid} grid - The main grid instance this selector will operate on.
+     * @param {AutoScroller} autoScroller - An instance of the auto-scroller utility to handle scrolling during selection.
+     */
     constructor(grid, autoScroller) {
+        /**
+         * The grid component instance.
+         * @type {Grid}
+         */
         this.grid = grid;
+
+        /**
+         * The auto-scroller utility instance.
+         * @type {AutoScroller}
+         */
         this.autoScroller = autoScroller;
+
+        /**
+         * A boolean flag indicating if a selection drag is currently in progress.
+         * @type {boolean}
+         */
         this.isSelecting = false;
+
+        /**
+         * The last recorded mouse position relative to the canvas.
+         * @type {{x: number, y: number}}
+         */
         this.lastMousePos = { x: 0, y: 0 };
+
+        /**
+         * A callback function to be executed when the selection process is complete (on mouse up).
+         * @type {?function}
+         */
         this.onComplete = null;
+
+        /**
+         * The ID of the current requestAnimationFrame loop, used for cancelling the animation.
+         * @type {?number}
+         */
         this.rafId = null; 
+
+        /**
+         * A pre-bound version of the selectionLoop method for use with requestAnimationFrame.
+         * @type {function}
+         */
         this.boundSelectionLoop = this.selectionLoop.bind(this);
+        
+        /**
+         * A pre-bound version of the handleMouseMove method for use with event listeners.
+         * @type {function}
+         */
         this.boundHandleMouseMove = this.handleMouseMove.bind(this);
+        
+        /**
+         * A pre-bound version of the handleMouseUp method for use with event listeners.
+         * @type {function}
+         */
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
     }
 
+    /**
+     * Checks if the mouse position is within the grid's data cell area (not headers).
+     * @param {{x: number, y: number}} mousePos - The mouse position to test.
+     * @returns {boolean} True if the position is inside the data area, false otherwise.
+     */
     hitTest(mousePos) {
         return mousePos.x > this.grid.headerWidth && mousePos.y > this.grid.headerHeight;
     }
 
+    /**
+     * Handles the mouse down event to initiate a selection.
+     * It can start a new selection, add to an existing selection (with Ctrl/Meta), 
+     * or extend a selection (with Shift).
+     * @param {MouseEvent} event - The native mouse down event.
+     * @param {function} onComplete - A callback to execute when the selection is finalized.
+     * @returns {void}
+     */
     handleMouseDown(event, onComplete) {
         this.onComplete = onComplete;
         this.lastMousePos = { x: event.offsetX, y: event.offsetY };
@@ -53,6 +115,11 @@ export default class RangeSelector {
         }
     }
 
+    /**
+     * Updates the last known mouse position during a mouse move event.
+     * @param {MouseEvent} event - The native mouse move event.
+     * @returns {void}
+     */
     handleMouseMove(event) {
         if (event) {
             const rect = this.grid.canvas.getBoundingClientRect();
@@ -61,6 +128,11 @@ export default class RangeSelector {
     }
 
     
+    /**
+     * The main loop for handling drag-selection, run via requestAnimationFrame.
+     * It updates the selection area based on the current mouse position and triggers auto-scrolling.
+     * @returns {void}
+     */
     selectionLoop() {
         if (!this.isSelecting) return; 
 
@@ -82,6 +154,12 @@ export default class RangeSelector {
     }
 
 
+    /**
+     * Handles the mouse up event to finalize the selection process.
+     * It stops the selection loop, cleans up event listeners, and normalizes the selection area.
+     * @param {MouseEvent} event - The native mouse up event.
+     * @returns {void}
+     */
     handleMouseUp(event) {
         if (this.isSelecting) {
             this.isSelecting = false;
@@ -103,6 +181,11 @@ export default class RangeSelector {
         }
     }
 
+    /**
+     * Ensures the selection area's `start` property holds the top-left cell coordinates
+     * and the `end` property holds the bottom-right cell coordinates.
+     * @returns {void}
+     */
     normalizeSelectionArea() {
         if (!this.grid.selectionArea) return;
         const { start, end } = this.grid.selectionArea;

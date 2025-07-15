@@ -1,4 +1,8 @@
 export default class RowResizeHandler {
+    /**
+     * Intializes Row Resize Handler 
+     * @param {import('./grid').default} grid 
+     */
     constructor(grid) {
         this.grid = grid;
         this.canvas = grid.canvas;
@@ -13,7 +17,12 @@ export default class RowResizeHandler {
         this.boundHandleMouseMove = this.handleMouseMove.bind(this);
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
     }
-
+    
+    /**
+     * A function to test if Row Resize has to be done based on Mouse pointer position
+     * @param {{x: number, y: number}} mousePos Position of mouse pointer relative to pointer 
+     * @returns {({index: number} | null)} An object containing the index of the row to be resized if the mouse is on a divider, otherwise null.
+     */
     hitTest(mousePos) {
     if (mousePos.x > this.grid.headerWidth) return null;
 
@@ -30,8 +39,14 @@ export default class RowResizeHandler {
     }
 
     return null;
-}
-
+    }
+    
+    /**
+     * Handles the mouse down event to start a row resize operation.
+     * @param {MouseEvent} event The mouse down event.
+     * @param {function(): void} onComplete A callback function to execute when the resize operation is complete.
+     * @param {{index: number}} hitResult An object containing the index of the column to be resized.
+     */
     handleMouseDown(event, onComplete, hitResult) {
         this.isResizing = true;
         this.onComplete = onComplete;
@@ -46,7 +61,11 @@ export default class RowResizeHandler {
         event.stopPropagation();
         event.preventDefault();
     }
-
+    
+    /**
+     * Handles the mouse move event to update the row width during a resize.
+     * @param {MouseEvent} event The mouse move event.
+     */
     handleMouseMove(event) {
         const deltaY = event.clientY - this.resizeStartPos;
         let newHeight = this.originalHeight + deltaY;
@@ -56,7 +75,11 @@ export default class RowResizeHandler {
        
 
     }
-
+    
+    /**
+     * Handles the mouse event to end row resizing.
+     * @param {MouseEvent} event The mouse up event. 
+     */
     handleMouseUp(event) {
         if (this.isResizing) {
             this.isResizing = false;

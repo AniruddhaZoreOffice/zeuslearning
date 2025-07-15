@@ -15,11 +15,12 @@ export default class CellEditor {
 
     }
 
-    /**
+     /**
      * Shows and positions the editor over a given cell.
-     * @param {{row: number, col: number}} cell 
+     * @param {{row: number, col: number}} cell The cell to edit.
+     * @param {?string} [initialValue=null] The initial character to populate the editor with. If null, the cell's existing data is used.
      */
-    startEditing(cell) {
+    startEditing(cell, initialValue = null) {
         if (!cell) return;
         this.editingCell = cell;
         const { row, col } = cell;
@@ -27,6 +28,7 @@ export default class CellEditor {
         this.grid.isEditing = true;
         this.grid.requestRedraw(); 
 
+        // --- All your positioning and styling code remains the same ---
         const x = this.grid.getColX(col) - this.grid.scrollX;
         const y = this.grid.getRowY(row) - this.grid.scrollY;
         const width = this.grid.getColWidth(col);
@@ -43,10 +45,18 @@ export default class CellEditor {
         this.input.style.outline = 'none';
         this.input.style.boxSizing = 'border-box';
         this.input.style.padding = '0 4px';
-
-        this.input.value = this.grid.dataStorage.getCellValue(row, col) || '';
+       
         this.input.focus();
-        this.input.select();
+
+        if (initialValue !== null) {
+            
+            this.input.value = initialValue ;
+            this.input.setSelectionRange(1, 1); 
+        } else {
+            
+            this.input.value = this.grid.dataStorage.getCellValue(row, col) || '';
+            this.input.select();
+        }
     }
 
     /**
@@ -72,14 +82,49 @@ export default class CellEditor {
     }
 
     handleKeyDown(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            this.stopEditing(true);
-        } else if (event.key === 'Escape') {
-            event.preventDefault();
-            this.stopEditing(false); 
-        }
+        switch (event.key) {
+            case 'Enter':
+            case 'ArrowDown':
+                event.preventDefault(); 
+                event.stopPropagation();
+                this.grid.stopEditingAndMove(0, 1); 
+                return; 
 
+            case 'ArrowUp':
+                event.preventDefault();
+                event.stopPropagation();
+                this.grid.stopEditingAndMove(0, -1); 
+                return;
+
+            case 'ArrowLeft':
+                
+                if (this.input.selectionStart === 0 && this.input.selectionEnd === 0) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.grid.stopEditingAndMove(-1, 0); 
+                }
+                return;
+
+            case 'ArrowRight':
+                
+                if (this.input.selectionStart === this.input.value.length && this.input.selectionEnd === this.input.value.length) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    this.grid.stopEditingAndMove(1, 0);
+                }
+                return;
+            
+            case 'Tab':
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.shiftKey) {
+                    this.grid.stopEditingAndMove(-1, 0);
+                } else {
+                    this.grid.stopEditingAndMove(1, 0); 
+                }
+                return;
+                
+            }
     }
 
     isActive() {

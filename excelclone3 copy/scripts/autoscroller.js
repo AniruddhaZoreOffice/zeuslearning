@@ -28,18 +28,25 @@ export default class AutoScroller {
      * This should be called during a mouse move event.
      * @param {{x: number, y: number}} mousePos The current mouse position relative to the canvas.
      */
-    check(mousePos) {
+    check(mousePos,options = {}) {
+        const allowHorizontal = options.horizontal !== false;
+        const allowVertical = options.vertical !== false;
+
         const dpr = this.grid.getDPR();
         const canvasWidth = this.grid.canvas.width / dpr;
         const canvasHeight = this.grid.canvas.height / dpr;
 
         const direction = { x: 0, y: 0 };
 
-        if (mousePos.x < this.zoneSize) direction.x = -1;
-        else if (mousePos.x > canvasWidth - this.zoneSize) direction.x = 1;
+        if (allowHorizontal) {
+            if (mousePos.x < this.zoneSize) direction.x = -1;
+            else if (mousePos.x > canvasWidth - this.zoneSize) direction.x = 1;
+        }
 
-        if (mousePos.y < this.zoneSize) direction.y = -1;
-        else if (mousePos.y > canvasHeight - this.zoneSize) direction.y = 1;
+        if (allowVertical) {
+            if (mousePos.y < this.zoneSize) direction.y = -1;
+            else if (mousePos.y > canvasHeight - this.zoneSize) direction.y = 1;
+        }
         
         this.scrollDirection = direction;
 
@@ -84,16 +91,13 @@ export default class AutoScroller {
         this.grid.scrollX = Math.max(0, Math.min(newScrollX, this.grid.getMaxScrollX()));
         this.grid.scrollY = Math.max(0, Math.min(newScrollY, this.grid.getMaxScrollY()));
 
-        // Sync the actual scrollbars
         this.grid.hScrollbar.scrollLeft = this.grid.scrollX;
         this.grid.vScrollbar.scrollTop = this.grid.scrollY;
 
-        // Notify the SelectionHandler that a scroll happened, so it can update the selection
         if (this.onScrollCallback) {
             this.onScrollCallback();
         }
 
-        // Continue the loop
         this.scrollLoopId = requestAnimationFrame(this._scrollLoop);
     }
 }

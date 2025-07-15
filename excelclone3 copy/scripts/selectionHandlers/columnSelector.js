@@ -1,4 +1,9 @@
 export default class ColumnSelector {
+    /**
+     * Initializes Column Selection Handler
+     * @param {import('./grid').default} grid A grid instance
+     * @param {import('./autoScroller').default} autoScroller An autoscroller instance 
+     */
     constructor(grid, autoScroller) {
         this.grid = grid;
         this.autoScroller = autoScroller;
@@ -13,11 +18,22 @@ export default class ColumnSelector {
         this.boundHandleMouseMove = this.handleMouseMove.bind(this);
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
     }
-
+    
+    /**
+     * A function to test if Column Selection needs to be done
+     * @param {{x:Number,y:Number}} mousePos Position of mouse pointer relative to canvas
+     * @returns {({index: number} | null)} An object containing the index of the row to be resized if the mouse is on a divider, otherwise null.
+     */
     hitTest(mousePos) {
         return mousePos.y < this.grid.headerHeight && mousePos.x > this.grid.headerWidth;
     }
-
+    
+    /**
+     * Handles the mouse down event to start a column selection operation.
+     * @param {MouseEvent} event The mouse down event.
+     * @param {function(): void} onComplete A callback function to execute when the selection operation is complete.
+     * @returns An object containing the index of the column to be selected if the mouse is on a column header, otherwise null.
+     */
     handleMouseDown(event, onComplete) {
         this.onComplete = onComplete;
         this.lastMousePos = { x: event.offsetX, y: event.offsetY };
@@ -48,14 +64,22 @@ export default class ColumnSelector {
         window.addEventListener('mouseup', this.boundHandleMouseUp);
         this.selectionLoop();
     }
-
+    
+    /**
+     * Handles number of selected rows till drag
+     * @param {MouseEvent} event A mouse move event 
+     */
     handleMouseMove(event) {
         if (event) {
             const rect = this.grid.canvas.getBoundingClientRect();
             this.lastMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
         }
     }
-
+    
+    /**
+     * Redraw grids and updates selection area for smoother animation
+     * @returns Null if not selecting
+     */
     selectionLoop() {
         if (!this.isSelecting) return;
 
@@ -68,7 +92,11 @@ export default class ColumnSelector {
 
         this.rafId = requestAnimationFrame(this.boundSelectionLoop);
     }
-
+    
+    /**
+     * Stop selection on mouse up event 
+     * @param {MouseEvent} event A mouse up event
+     */
     handleMouseUp(event) {
         if (this.isSelecting) {
             this.isSelecting = false;
@@ -89,7 +117,12 @@ export default class ColumnSelector {
             this.onComplete = null;
         }
     }
-
+     
+    /**
+     * Updates selected rows and columns indexes
+     * @param {{index}} endCol @returns {({index: number} | null)} An object containing index of last selected column.
+     * @returns  
+     */
     updateSelection(endCol) {
         if (endCol === null) return;
 
@@ -104,7 +137,10 @@ export default class ColumnSelector {
         const targetSet = this.grid.selectedColumns;
         targetSet.clear();
 
-        for (const item of this.selectionBeforeDrag) targetSet.add(item);
-        for (const item of currentDragRange) targetSet.add(item);
+        for (const item of this.selectionBeforeDrag) 
+            targetSet.add(item);
+
+        for (const item of currentDragRange) 
+            targetSet.add(item);
     }
 }

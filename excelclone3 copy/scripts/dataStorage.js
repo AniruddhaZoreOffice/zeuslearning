@@ -1,4 +1,8 @@
 export default class DataStorage {
+    /**
+     * Intializes Data Storage handler
+     * @param {import('./grid').default} grid 
+     */
     constructor(grid) {
         this.grid = grid;
         this.data = {};

@@ -1,3 +1,5 @@
+import { ChangeRowHeightCommand } from '../commands.js';
+
 export default class RowResizeHandler {
     /**
      * Intializes Row Resize Handler 
@@ -82,19 +84,28 @@ export default class RowResizeHandler {
      */
     handleMouseUp(event) {
         if (this.isResizing) {
+            const finalHeight = this.grid.getRowHeight(this.targetRowIndex);
+
+            if (finalHeight !== this.originalHeight) {
+                const command = new ChangeRowHeightCommand(
+                    this.grid,
+                    this.targetRowIndex,
+                    finalHeight,
+                    this.originalHeight
+                );
+                this.grid.undoRedoManager.execute(command);
+            }
+
             this.isResizing = false;
             this.targetRowIndex = null;
-
-            
             window.removeEventListener('mousemove', this.boundHandleMouseMove);
             window.removeEventListener('mouseup', this.boundHandleMouseUp);
 
-            this.grid.updateScrollbarContentSize();
-            
             if (this.onComplete) {
                 this.onComplete();
             }
             this.onComplete = null;
         }
     }
+    
 }

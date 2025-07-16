@@ -1,3 +1,5 @@
+import { ChangeCellValueCommand } from './commands.js';
+
 export default class CellEditor {
     /**
      * Initializes the cell editor component. It creates the input element but
@@ -67,20 +69,35 @@ export default class CellEditor {
         if (!this.editingCell) return;
 
         if (save) {
-            this.grid.dataStorage.setCellValue(this.editingCell.row, this.editingCell.col, this.input.value);
-        }
+            const { row, col } = this.editingCell;
+            const newValue = this.input.value;
+            const oldValue = this.grid.dataStorage.getCellValue(row, col) || '';
+    
+            if (newValue !== oldValue) {
+                    const command = new ChangeCellValueCommand(this.grid, row, col, newValue, oldValue);
+                    this.grid.undoRedoManager.execute(command);
+                }
+            }
 
         this.input.style.display = 'none';
         this.editingCell = null;
         this.grid.isEditing = false;
         this.grid.canvas.focus();
-        this.grid.requestRedraw();
+      
     }
-
+    
+    /**
+     * Stops Editing
+     */
     handleBlur() {
         this.stopEditing(true);
     }
-
+    
+    /**
+     * Handles all Keyboard action logic. 
+     * @param {import('react').KeyboardEvent} event Keyboard event 
+     * @returns Null
+     */
     handleKeyDown(event) {
         switch (event.key) {
             case 'Enter':
@@ -126,7 +143,11 @@ export default class CellEditor {
                 
             }
     }
-
+    
+    /**
+     * Keeps editing cell active
+     * @returns Null
+     */
     isActive() {
         return this.editingCell !== null;
     }

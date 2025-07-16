@@ -2,6 +2,7 @@ import EventListeners from './eventlisteners.js';
 import Grid from './grid.js';
 import AutoScroller from './autoscroller.js';
 import { HANDLER_CLASSES, HANDLER_CURSOR_MAP } from './register.js';
+import UndoRedoManager from './UndoRedoManager.js';
 
 class App {
     /**
@@ -15,7 +16,8 @@ class App {
 
         this.grid = new Grid("100vw", "93vh", rows, cols, cellWidth, cellHeight);
         const autoScroller = new AutoScroller(this.grid);
-        
+        this.grid.undoRedoManager = new UndoRedoManager(this.grid);
+
         const handlerInstances = HANDLER_CLASSES.map(HandlerClass => {
             const needsAutoScroller = HandlerClass.prototype.constructor.length > 1;
 

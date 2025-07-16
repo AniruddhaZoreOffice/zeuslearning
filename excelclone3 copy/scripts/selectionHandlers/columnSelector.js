@@ -117,7 +117,8 @@ export default class ColumnSelector {
             this.onComplete = null;
         }
     }
-     
+    
+    
     /**
      * Updates selected rows and columns indexes
      * @param {{index}} endCol @returns {({index: number} | null)} An object containing index of last selected column.

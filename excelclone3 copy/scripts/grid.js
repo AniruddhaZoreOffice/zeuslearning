@@ -1,11 +1,7 @@
 import dataStorage from "./dataStorage.js";
 import CellEditor from "./cellEditor.js";
 
-/**
- * The core Grid component that manages rendering, user interaction, and state.
- * It creates the necessary DOM elements (canvas, scrollbars), handles the render loop,
- * and provides an API for interaction with the grid's data and properties.
- */
+
 export default class Grid {
     /**
      * Initializes the Grid component.
@@ -16,12 +12,24 @@ export default class Grid {
      * @param {number} defaultCellWidth - The default width for all data cells.
      * @param {number} defaultCellHeight - The default height for all data cells.
      */
+
     constructor(width, height, rows, cols, defaultCellWidth, defaultCellHeight) {
         
         /**
          * The main container div for the entire grid component.
          * @type {HTMLDivElement}
          */
+
+        this.uploadButton = document.createElement("input")
+        this.uploadButton.type = "file"
+        this.uploadButton.accept = ".json,application/json"; 
+
+        this.headerDiv = document.createElement("div")
+        this.headerDiv.className = "header-div"
+        
+        this.computations = document.createElement("div")
+        this.computations.className = "computations"
+        
         this.container = document.createElement("div");
         this.container.className = "grid-container";
         this.container.style.width = width;
@@ -70,7 +78,11 @@ export default class Grid {
         this.container.appendChild(this.canvas);
         this.container.appendChild(this.hScrollbar);
         this.container.appendChild(this.vScrollbar);
+        
+        this.headerDiv.appendChild(this.uploadButton)
+        this.headerDiv.appendChild(this.computations)
 
+        document.body.appendChild(this.headerDiv)
         document.body.appendChild(this.container);
 
         /**
@@ -336,48 +348,62 @@ export default class Grid {
      * Calculates the range of rows and columns currently visible in the viewport.
      * @returns {void}
      */
+    
     calculateViewport() {
         const dpr = this.getDPR();
         const canvasH = this.canvas.height / dpr;
         const canvasW = this.canvas.width / dpr;
-        const scrollbarSize = 10;
-
-        const visibleH = canvasH - this.headerHeight ;
+        const scrollbarSize = 10; 
+        const visibleH = canvasH - this.headerHeight;
         const visibleW = canvasW - this.headerWidth - scrollbarSize;
-        let accY = 0; 
-        this.viewportStartRow = 1;
-
-        for (let r = 1; r <= this.rows; r++) { 
-            if (accY + this.rowHeights[r] >= this.scrollY) {
-                 this.viewportStartRow = r; 
-                 break; 
-                } 
-                accY += this.rowHeights[r]; 
+    
+        let y = 0;
+        let startRowFound = false;
+        this.viewportStartRow = this.rows + 1; 
+        this.viewportEndRow = this.rows;
+    
+        for (let r = 1; r <= this.rows; r++) {
+            const rowHeight = this.rowHeights[r];
+    
+            if (!startRowFound && y + rowHeight >= this.scrollY) {
+                this.viewportStartRow = r;
+                this.viewportEndRow = r;
+                startRowFound = true;
             }
-
-        let sumY = 0; 
-        this.viewportEndRow = this.viewportStartRow;
-        for (let r = this.viewportStartRow; r <= this.rows; r++) 
-            { 
-                sumY += this.rowHeights[r] ;
-                this.viewportEndRow = r; 
-                if (sumY - this.scrollY> visibleH){
+    
+            if (startRowFound) {
+                this.viewportEndRow = r;
+                
+                if (y + rowHeight - this.scrollY > visibleH) {
                     break;
                 }
             }
+            y += rowHeight;
+        }
 
-        let accX = 0; this.viewportStartCol = 1;
-        for (let c = 1; c < this.cols; c++) { if (accX + this.colWidths[c] >= this.scrollX) { this.viewportStartCol = c; break; } accX += this.colWidths[c]; }
-        let sumX = 0; this.viewportEndCol = this.viewportStartCol;
-        for (let c = this.viewportStartCol; c <= this.cols; c++) { 
-            sumX += this.colWidths[c]; 
-            this.viewportEndCol = c; 
+    let x = 0;
+    let startColFound = false;
+    this.viewportStartCol = this.cols + 1; 
+    this.viewportEndCol = this.cols;
 
-            if (sumX - this.scrollX> visibleW){
-               break; 
+    for (let c = 1; c <= this.cols; c++) { 
+        const colWidth = this.colWidths[c];
+
+        if (!startColFound && x + colWidth >= this.scrollX) {
+            this.viewportStartCol = c;
+            this.viewportEndCol = c;
+            startColFound = true;
+        }
+
+        if (startColFound) {
+            this.viewportEndCol = c;
+            if (x + colWidth - this.scrollX > visibleW) {
+                break;
             }
-            }
+        }
+        x += colWidth;
     }
+}
     
     /**
      * Gets the starting X-coordinate for a given column index (left edge).
@@ -440,19 +466,36 @@ export default class Grid {
      * @param {number} col - The 0-based column index.
      * @returns {string} The Excel-style label.
      */
-    colToExcelLabel(col) { let label = ""; col++; while (col > 0) { let rem = (col - 1) % 26; label = String.fromCharCode(65 + rem) + label; col = Math.floor((col - 1) / 26); } return label; }
+    colToExcelLabel(col) { 
+        let label = ""; 
+        col++; 
+        while (col > 0) { 
+            let rem = (col - 1) % 26; 
+            label = String.fromCharCode(65 + rem) + label; 
+            col = Math.floor((col - 1) / 26); 
+        } 
+        return label; 
+    }
     
     /**
      * Calculates the maximum horizontal scroll position.
      * @returns {number} The maximum scrollX value.
      */
-    getMaxScrollX() { const totalGridWidth = this.colWidths.reduce((sum, width) => sum + width, 0) - this.headerWidth; const canvasWidth = this.canvas.width / this.getDPR(); return Math.max(0, totalGridWidth - (canvasWidth - this.headerWidth)); }
+    getMaxScrollX() { 
+        const totalGridWidth = this.colWidths.reduce((sum, width) => sum + width, 0) - this.headerWidth; 
+        const canvasWidth = this.canvas.width / this.getDPR(); 
+        return Math.max(0, totalGridWidth - (canvasWidth - this.headerWidth)); 
+    }
     
     /**
      * Calculates the maximum vertical scroll position.
      * @returns {number} The maximum scrollY value.
      */
-    getMaxScrollY() { const totalGridHeight = this.rowHeights.reduce((sum, height) => sum + height, 0) - this.headerHeight; const canvasHeight = this.canvas.height / this.getDPR(); return Math.max(0, totalGridHeight - (canvasHeight - this.headerHeight)); }
+    getMaxScrollY() { 
+        const totalGridHeight = this.rowHeights.reduce((sum, height) => sum + height, 0) - this.headerHeight; 
+        const canvasHeight = this.canvas.height / this.getDPR(); 
+        return Math.max(0, totalGridHeight - (canvasHeight - this.headerHeight)); 
+    }
     
     /**
      * The main drawing function that orchestrates all rendering on the canvas.
@@ -492,7 +535,7 @@ export default class Grid {
         this._drawHeaderMainBorder(ctx, canvasWidth, canvasHeight, style);
         this._drawSelectionBorders(ctx, style, canvasWidth, canvasHeight);
         this._drawActiveCellBorder(ctx, visibleCoords, style);
-        this._drawCellData(ctx, visibleCoords, style);
+        this._drawCellData(ctx, visibleCoords, style,canvasWidth,canvasHeight);
     }
     
     /**
@@ -575,6 +618,55 @@ export default class Grid {
         }
     }
     
+     /**
+     * @private
+     * Renders the text content of the visible cells, clipping text that overflows the cell's boundaries.
+     * @param {CanvasRenderingContext2D} ctx - The rendering context.
+     * @param {object} coords - Pre-calculated coordinates of visible cells.
+     * @param {object} style - The style object containing colors.
+     * @returns {void}
+     */
+    _drawCellData(ctx, coords, style,canvasWidth,canvasHeight) {
+        ctx.save(); 
+        ctx.beginPath();
+        ctx.rect(
+            this.headerWidth,
+            this.headerHeight,
+            canvasWidth - this.headerWidth,
+            canvasHeight - this.headerHeight
+        );
+        ctx.clip();
+        ctx.font = "14px Arial";
+        ctx.fillStyle = style.cellTextColor;
+        ctx.textBaseline = "middle";
+        ctx.textAlign = "left";
+
+        const PADDING = 4; 
+
+        for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
+            for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
+                if (this.isEditing && this.activeCell.row === r && this.activeCell.col === c) {
+                    continue;
+                }
+                const value = this.dataStorage.getCellValue(r, c);
+                if (value) {
+                    const row = coords.rows[r];
+                    const col = coords.cols[c];
+                    
+                    ctx.save();
+                    
+                    ctx.beginPath();
+                    ctx.rect(col.x, row.y, col.width, row.height);
+                    ctx.clip();
+                    ctx.fillText(value, col.x + PADDING, row.y + row.height / 2);
+                    ctx.restore();
+
+                }
+            }
+        }
+        ctx.restore()
+    }
+
     /**
      * @private
      * Draws the background color for selected headers, with proper clipping and correct logic.
@@ -705,50 +797,6 @@ export default class Grid {
         ctx.stroke();
     }
     
-    /**
-     * @private
-     * Renders the text content of the visible cells, clipping text that overflows the cell's boundaries.
-     * @param {CanvasRenderingContext2D} ctx - The rendering context.
-     * @param {object} coords - Pre-calculated coordinates of visible cells.
-     * @param {object} style - The style object containing colors.
-     * @returns {void}
-     */
-    _drawCellData(ctx, coords, style) {
-        ctx.font = "14px Arial";
-        ctx.fillStyle = style.cellTextColor;
-        ctx.textBaseline = "middle";
-        ctx.textAlign = "left";
-
-        const PADDING = 4; // Use a constant for padding for readability
-
-        for (let r = this.viewportStartRow; r <= this.viewportEndRow; r++) {
-            for (let c = this.viewportStartCol; c <= this.viewportEndCol; c++) {
-                if (this.isEditing && this.activeCell.row === r && this.activeCell.col === c) {
-                    continue;
-                }
-                
-                const value = this.dataStorage.getCellValue(r, c);
-                if (value) {
-                    const row = coords.rows[r];
-                    const col = coords.cols[c];
-                    
-                    ctx.save();
-                    
-                    // Define the clipping region to be the EXACT size of the cell.
-                    ctx.beginPath();
-                    ctx.rect(col.x, row.y, col.width, row.height);
-                    ctx.clip();
-                    
-                    // Draw the text, offset by the padding.
-                    // The clip() command above will prevent it from overflowing.
-                    ctx.fillText(value, col.x + PADDING, row.y + row.height / 2);
-                    
-                    ctx.restore();
-                }
-            }
-        }
-    }
-
 
     /**
      * @private
@@ -842,7 +890,7 @@ export default class Grid {
                 ctx.strokeRect(clipX, clipY, clipW, clipH);
             ctx.beginPath();
 
-            // Draw bottom border for the selected column headers
+            
             const startX = this.getColX(minCol) - this.scrollX;
             const endX = this.getColX(maxCol + 1) - this.scrollX;
             const finalStartX = Math.max(this.headerWidth, startX);
@@ -851,7 +899,7 @@ export default class Grid {
             ctx.moveTo(finalStartX, this.headerHeight - 0.5);
             ctx.lineTo(finalEndX, this.headerHeight - 0.5);
 
-            // Draw right border for the selected row headers
+            
             const startY = this.getRowY(minRow) - this.scrollY;
             const endY = this.getRowY(maxRow + 1) - this.scrollY;
             const finalStartY = Math.max(this.headerHeight, startY);
@@ -1048,7 +1096,8 @@ export default class Grid {
                 }
             }
         }
-        // You can add logic here for selectedRows and selectedColumns if needed
+       
+        
         this.requestRedraw();
     }
 
@@ -1062,7 +1111,7 @@ export default class Grid {
         const canvasWidth = this.canvas.width / dpr;
         const canvasHeight = this.canvas.height / dpr;
 
-        // Vertical check
+        
         const cellTopY = this.getRowY(row);
         const cellBottomY = cellTopY + this.getRowHeight(row);
         const visibleTopY = this.scrollY + this.headerHeight;
@@ -1074,7 +1123,7 @@ export default class Grid {
             this.vScrollbar.scrollTop = cellBottomY - canvasHeight;
         }
 
-        // Horizontal check
+        
         const cellLeftX = this.getColX(col);
         const cellRightX = cellLeftX + this.getColWidth(col);
         const visibleLeftX = this.scrollX + this.headerWidth;
@@ -1101,4 +1150,67 @@ export default class Grid {
 
         this.moveActiveCell(dx, dy);
     }
-}
+
+    /**
+     * Loads a new dataset from a JSON array, updates grid dimensions, and redraws.
+     * @param {Array<object>} jsonData - An array of objects representing the data.
+     */
+    loadData(jsonData) {
+        if (!Array.isArray(jsonData) || jsonData.length === 0) {
+            alert("Invalid or empty data provided.");
+            return;
+        }
+    
+        const headers = Object.keys(jsonData[0]);
+        const newDataRows = jsonData.length;
+        const newDataCols = headers.length;
+        const requiredRows = newDataRows + 1;
+        const requiredCols = newDataCols;
+        if (requiredRows > this.rows) {
+            this.rows = requiredRows;
+            
+            const defaultCellHeight = this.rowHeights[1] || 24;
+            while (this.rowHeights.length <= this.rows) {
+                this.rowHeights.push(defaultCellHeight);
+            }
+        }
+        
+        if (requiredCols > this.cols) {
+            this.cols = requiredCols;
+           
+            const defaultCellWidth = this.colWidths[1] || 100;
+            while (this.colWidths.length <= this.cols) {
+                this.colWidths.push(defaultCellWidth);
+            }
+        }
+
+        
+        this.dataStorage.clear();
+        this.clearSelections(false); 
+        this.activeCell = null;
+        this.scrollX = 0; 
+        this.scrollY = 0;
+        this.hScrollbar.scrollLeft = 0;
+        this.vScrollbar.scrollTop = 0;
+    
+        headers.forEach((header, colIndex) => {
+            
+            this.dataStorage.setCellValue(1, colIndex + 1, header);
+
+        });
+    
+        jsonData.forEach((dataRow, rowIndex) => {
+            headers.forEach((header, colIndex) => {
+               
+                this.dataStorage.setCellValue(rowIndex + 2, colIndex + 1, dataRow[header]);
+            });
+        });
+    
+        this.updateScrollbarContentSize();
+        this.clearSelections();
+        this.activeCell = null;
+        this.requestRedraw();
+        
+        
+    }
+    }

@@ -1,3 +1,5 @@
+import aggregator from "../aggregationFunctions.js";
+
 export default class RangeSelector {
     /**
      * Initializes the RangeSelector.
@@ -7,15 +9,20 @@ export default class RangeSelector {
     constructor(grid, autoScroller) {
         /**
          * The grid component instance.
-         * @type {Grid}
+         * @type {grid}
          */
         this.grid = grid;
 
         /**
          * The auto-scroller utility instance.
-         * @type {AutoScroller}
+         * @type {autoScroller}
          */
         this.autoScroller = autoScroller;
+        
+        /**
+         * The Aggregator functions instance
+         */
+        this.aggregator = new aggregator(this.grid)
 
         /**
          * A boolean flag indicating if a selection drag is currently in progress.
@@ -93,6 +100,7 @@ export default class RangeSelector {
         if (!isExtend && !event.shiftKey) {
             this.grid.selectedColumns.clear();
             this.grid.selectedRows.clear();
+            this.aggregator.clearComputationsDisplay()
         }
 
         this.grid.activeCell = { row: clickedRow, col: clickedCol };
@@ -109,6 +117,7 @@ export default class RangeSelector {
                 end: this.grid.activeCell
             };
             
+            
             window.addEventListener('mousemove', this.boundHandleMouseMove);
             window.addEventListener('mouseup', this.boundHandleMouseUp);
             this.selectionLoop();
@@ -124,6 +133,7 @@ export default class RangeSelector {
         if (event) {
             const rect = this.grid.canvas.getBoundingClientRect();
             this.lastMousePos = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+            this.aggregator.update()
         }
     }
 
@@ -156,7 +166,6 @@ export default class RangeSelector {
 
     /**
      * Handles the mouse up event to finalize the selection process.
-     * It stops the selection loop, cleans up event listeners, and normalizes the selection area.
      * @param {MouseEvent} event - The native mouse up event.
      * @returns {void}
      */

@@ -43,4 +43,11 @@ export default class DataStorage {
             delete this.data[key];
         }
     }
+
+    /**
+     * Clears all data from the storage.
+     */
+    clear() {
+        this.data = {};
+    }
 }

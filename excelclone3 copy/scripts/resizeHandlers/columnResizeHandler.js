@@ -1,3 +1,5 @@
+import { ChangeColumnWidthCommand } from '../commands.js';
+
 export default class ColumnResizeHandler {
     /**
      * Intializes the Column Resize Handler
@@ -74,13 +76,12 @@ export default class ColumnResizeHandler {
             cancelAnimationFrame(this.rafId);
         }
 
-        // Schedule the actual resize logic to run on the next animation frame
         this.rafId = requestAnimationFrame(() => {
         const deltaX = event.clientX - this.resizeStartPos;
         let newWidth = this.originalWidth + deltaX;
-        newWidth = Math.max(20, newWidth); // Ensure minimum width
+        newWidth = Math.max(20, newWidth); 
         this.grid.setColumnWidth(this.targetColumnIndex, newWidth);
-        this.rafId = null; // Reset rafId after execution
+        this.rafId = null; 
         });
     }
 
@@ -91,23 +92,31 @@ export default class ColumnResizeHandler {
      * @returns {void}
      */
     handleMouseUp(event) {
-        if (this.rafId) {
-            cancelAnimationFrame(this.rafId);
-            this.rafId = null;
-        }
-        if (this.isResizing) {
-            this.isResizing = false;
-            this.targetColumnIndex = null;
-            
-            window.removeEventListener('mousemove', this.boundHandleMouseMove);
-            window.removeEventListener('mouseup', this.boundHandleMouseUp);
-            
-            this.grid.updateScrollbarContentSize();
-            
-            if (this.onComplete) {
-                this.onComplete();
-            }
-            this.onComplete = null;
-        }
+    if (this.rafId) {
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null;
     }
+    if (this.isResizing) {
+        const finalWidth = this.grid.getColWidth(this.targetColumnIndex);
+
+        if (finalWidth !== this.originalWidth) {
+            const command = new ChangeColumnWidthCommand(
+                this.grid,
+                this.targetColumnIndex,
+                finalWidth,
+                this.originalWidth
+            );
+            this.grid.undoRedoManager.execute(command);
+        }
+
+        this.isResizing = false;
+        this.targetColumnIndex = null;
+        window.removeEventListener('mousemove', this.boundHandleMouseMove);
+        window.removeEventListener('mouseup', this.boundHandleMouseUp);
+        if (this.onComplete) {
+            this.onComplete();
+        }
+        this.onComplete = null;
+    }
+}
 }

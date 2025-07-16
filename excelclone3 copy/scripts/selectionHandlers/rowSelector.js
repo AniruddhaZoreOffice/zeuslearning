@@ -203,4 +203,5 @@ export default class RowSelector {
         for (const item of this.selectionBeforeDrag) targetSet.add(item);
         for (const item of currentDragRange) targetSet.add(item);
     }
+    
 }

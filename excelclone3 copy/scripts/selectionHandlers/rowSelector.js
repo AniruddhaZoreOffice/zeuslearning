@@ -82,7 +82,8 @@ export default class RowSelector {
      * @returns {boolean} True if the position is inside the row header area, false otherwise.
      */
     hitTest(mousePos) {
-        return mousePos.x < this.grid.headerWidth && mousePos.y > this.grid.headerHeight;
+        const hitAreaX = 50
+        return mousePos.x < hitAreaX && mousePos.y > this.grid.headerHeight;
     }
 
     /**

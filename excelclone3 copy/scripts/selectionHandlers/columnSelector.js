@@ -25,7 +25,9 @@ export default class ColumnSelector {
      * @returns {({index: number} | null)} An object containing the index of the row to be resized if the mouse is on a divider, otherwise null.
      */
     hitTest(mousePos) {
-        return mousePos.y < this.grid.headerHeight && mousePos.x > this.grid.headerWidth;
+        const hitAreaX = 10
+        const hitAreaY = 20
+        return mousePos.y < hitAreaY  && mousePos.x > hitAreaX;
     }
     
     /**

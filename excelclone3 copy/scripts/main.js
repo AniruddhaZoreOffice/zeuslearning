@@ -12,9 +12,12 @@ class App {
         const rows = 100000;
         const cols = 500;
         const cellWidth = 64;
-        const cellHeight = 20;
+        const cellHeight = 30;
+        const  grids = []
+        const newGridButton = document.createElement("button")
 
-        this.grid = new Grid("100vw", "93vh", rows, cols, cellWidth, cellHeight);
+
+        this.grid = new Grid("100vw", "73vh", rows, cols, cellWidth, cellHeight);
         const autoScroller = new AutoScroller(this.grid);
         this.grid.undoRedoManager = new UndoRedoManager(this.grid);
 

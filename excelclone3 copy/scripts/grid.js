@@ -114,6 +114,11 @@ export default class Grid {
          * @type {Set<number>}
          */
         this.selectedRows = new Set();
+
+        /**
+         * @type {?{row: number}}
+         */
+        this.hoveredRow = null
         
         /**
          * The currently active cell, identified by its row and column index.
@@ -198,6 +203,9 @@ export default class Grid {
          * @type {Array<number>}
          */
         this.colWidths = Array(cols + 1).fill(defaultCellWidth);
+
+        this.numRows = rows;
+        this.numCols = cols;
         
         /**
          * An array storing the height of each row.
@@ -211,6 +219,11 @@ export default class Grid {
          */
         this.CellEditor = new CellEditor(this)
 
+        /**
+         *  @type {EventListeners|null}
+         */
+        this.eventListeners = null;
+        
         this.renderLoop();
     }
 
@@ -253,6 +266,83 @@ export default class Grid {
         for (let i = 1; i <= this.rows; i++) totalGridHeight += this.rowHeights[i];
         this.vScrollContent.style.height = totalGridHeight + "px";
     }
+    
+    /**
+     * Gets the min, max, and count of fully selected columns.
+     * @returns {{min: number, max: number, count: number}|null} Null if no full columns are selected.
+     */
+    getSelectedColumnRange() {
+        if (this.selectedColumns.size === 0) {
+            return null;
+        }
+        const cols = Array.from(this.selectedColumns);
+        const minCol = Math.min(...cols);
+        const maxCol = Math.max(...cols);
+        return { min: minCol, max: maxCol, count: this.selectedColumns.size };
+    }
+
+    /**
+     * Gets the min, max, and count of fully selected rows.
+     * @returns {{min: number, max: number, count: number}|null} Null if no full rows are selected.
+     */
+    getSelectedRowRange() {
+        if (this.selectedRows.size === 0) {
+            return null;
+        }
+        const rows = Array.from(this.selectedRows);
+        const minRow = Math.min(...rows);
+        const maxRow = Math.max(...rows);
+        return { min: minRow, max: maxRow, count: this.selectedRows.size };
+    }
+    
+     /**
+     * Inserts one or more columns at a specific index with a specific width.
+     * @param {number} index - The 1-based index at which to insert.
+     * @param {number} [count=1] - The number of columns to insert.
+     * @param {number|null} [width=null] - The width for the new columns. If null, uses a default.
+     */
+    insertColumns(index, count = 1, width = null) {
+        if (count <= 0) return;
+
+        const newColumnWidth = width !== null ? width : 100; 
+
+        for (let i = 0; i < count; i++) {
+            
+            this.colWidths.splice(index, 0, newColumnWidth);
+        }
+        
+        
+        this.numCols += count;
+        
+        this.clearSelections(false);
+        this.updateScrollbarContentSize();
+        this.requestRedraw();
+        console.log(`Inserted ${count} column(s) of width ${newColumnWidth} at index ${index}`);
+    }
+
+    /**
+     * Inserts one or more rows at a specific index with a specific height.
+     * @param {number} index - The 1-based index at which to insert.
+     * @param {number} [count=1] - The number of rows to insert.
+     * @param {number|null} [height=null] - The height for the new rows. If null, uses a default.
+     */
+    insertRows(index, count = 1, height = null) {
+        if (count <= 0) return;
+
+        const newRowHeight = height !== null ? height : 25; 
+        for (let i = 0; i < count; i++) {
+            this.rowHeights.splice(index, 0, newRowHeight);
+        }
+
+        
+        this.numRows += count;
+
+        this.clearSelections(false);
+        this.updateScrollbarContentSize();
+        this.requestRedraw();
+        console.log(`Inserted ${count} row(s) of height ${newRowHeight} at index ${index}`);
+    }
+
 
     /**
      * The main render loop, which redraws the grid when `needsRedraw` is true.
@@ -536,6 +626,11 @@ export default class Grid {
         this._drawSelectionBorders(ctx, style, canvasWidth, canvasHeight);
         this._drawActiveCellBorder(ctx, visibleCoords, style);
         this._drawCellData(ctx, visibleCoords, style,canvasWidth,canvasHeight);
+         
+        if (this.eventListeners) {
+            this.eventListeners.drawHandlers(ctx);
+        }
+    
     }
     
     /**
@@ -1213,4 +1308,6 @@ export default class Grid {
         
         
     }
+
+    
     }

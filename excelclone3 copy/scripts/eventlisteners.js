@@ -52,6 +52,12 @@ export default class EventListeners {
          */
         this.handlers = handlers;
 
+        /**
+         * A direct reference to the RowSelector handler for specific hit-testing.
+         * @type {?RowSelector}
+         */
+        this.rowSelector = this.handlers.find(handler => handler.constructor.name === 'RowSelector');
+
         this.dataStorage = new DataStorage(this.grid)
 
         /**
@@ -62,6 +68,20 @@ export default class EventListeners {
 
         this.addListeners();
     }
+    /**
+     * Allows all registered handlers to draw their own UI elements (like resize handles or insert circles).
+     * This is called by the grid's main draw loop.
+     * @param {CanvasRenderingContext2D} ctx - The canvas rendering context.
+     */
+    drawHandlers(ctx) {
+        for (const handler of this.handlers) {
+            // Check if the handler has a draw method before calling it
+            if (typeof handler.draw === 'function') {
+                handler.draw(ctx);
+            }
+        }
+    }
+
 
     /**
      * Binds all necessary event listeners to the window, canvas, scrollbars, and cell editor input.
@@ -115,7 +135,9 @@ export default class EventListeners {
      * Handles double-click events on the canvas to initiate cell editing.
      * @returns {void}
      */
-    handleCanvasDoubleClick() { if (this.grid.activeCell && !this.grid.isEditing) { this.grid.startEditing(); } }
+    handleCanvasDoubleClick() {
+         if (this.grid.activeCell && !this.grid.isEditing) 
+            { this.grid.startEditing(); } }
 
 
     /**
@@ -149,9 +171,10 @@ export default class EventListeners {
     handleCanvasMouseDown(event) {
         if (this.currentHandler) return;
 
-        const mousePos = { x: event.offsetX, y: event.offsetY };
+        const mousePos = { x: event.offsetX, y: event.offsetY };        
 
         for (const handler of this.handlers) {
+            
            
             const hitResult = handler.hitTest(mousePos);
 
@@ -178,9 +201,16 @@ export default class EventListeners {
      * @returns {void}
      */
     handleCanvasMouseMove(event) {
+        for (const handler of this.handlers) {
+            if (typeof handler.handleMouseMove === 'function') {
+                handler.handleMouseMove(event);
+            }
+        }
+        
         if (this.currentHandler) {
             return;
         }
+
         this.updateCursor(event);
        
     }
@@ -273,7 +303,7 @@ export default class EventListeners {
             }
         } 
        
-        else if (/^[a-zA-Z0-9]$/.test(event.key) && !event.ctrlKey && !event.metaKey) {
+        else if ((/^[a-zA-Z0-9]$/.test(event.key) || event.key == "-"  ) && !event.ctrlKey && !event.metaKey) {
             event.preventDefault();
             this.grid.startEditing(true, event.key);
         }
